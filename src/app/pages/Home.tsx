@@ -3,50 +3,90 @@ import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { moods } from '../data/moods';
 
+const morphShapes = [
+  { hover: "50% 20% 50% 20% / 20% 50% 20% 50%", rotate: "15deg" },   // starburst
+  { hover: "50% 50% 50% 50% / 60% 60% 40% 40%", rotate: "0deg" },    // clover
+  { hover: "50% 50% 0% 0% / 100% 100% 0% 0%",   rotate: "0deg" },    // arch
+  { hover: "50% 50% 50% 50% / 8% 8% 92% 92%",   rotate: "0deg" },    // hourglass
+  { hover: "30% 70% 70% 30% / 70% 30% 30% 70%", rotate: "0deg" },    // scallop
+  { hover: "60% 40% 30% 70% / 40% 50% 60% 50%", rotate: "-6deg" },   // blob
+  { hover: "50% 50% 8% 8% / 50% 50% 8% 8%",     rotate: "0deg" },    // tombstone
+  { hover: "50% 0% 50% 0%",                       rotate: "0deg" },    // corner
+  { hover: "40% 10% 40% 10% / 10% 40% 10% 40%", rotate: "22deg" },   // spike
+];
+
 export default function Home() {
   const navigate = useNavigate();
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(1.5);
   const [cellSize, setCellSize] = useState(200);
+  const [hoveredId, setHoveredId] = useState<string | null>('adventurous');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      const s = isMobile ? 0.45 : 0.85;
-      setScale(s);
+  const COLS = 10;
+  const ROWS = 10;
 
-      // 8 columns, we want them to fill the viewport width with some padding
-      // viewport width in "canvas units" = window.innerWidth / scale
-      const canvasWidth = window.innerWidth / s;
-      const computed = Math.floor(canvasWidth / 8); // divide by 8 columns
-      setCellSize(computed);
-    };
+  const colMap: Record<string, number> = {
+    '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
+    '0': 4,
+    '100': 5, '200': 5, '300': 6, '400': 6,
+    '500': 7, '600': 7, '700': 8, '800': 8, '900': 9
+  };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const rowMap: Record<string, number> = {
+    '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
+    '0': 4,
+    '100': 5, '300': 6, '500': 7, '700': 8, '900': 9
+  };
 
-  // Compute dynamic positions from grid indices instead of hardcoded coords
-  // Columns: 8 per row, mapped from x values: -700,-500,-300,-100,100,300,500,700
-  // We replace those with computed column indices 0–7
-  const colMap: Record<number, number> = { '-700': 0, '-500': 1, '-300': 2, '-100': 3, 100: 4, 300: 5, 500: 6, 700: 7 };
-  const rowMap: Record<number, number> = { '-1100': 0, '-900': 1, '-700': 2, '-500': 3, '-300': 4, '-100': 5, 100: 6, 300: 7, 500: 8, 700: 9, 900: 10, 1100: 11 };
+    useEffect(() => {
+      const handleResize = () => {
+        const computed = Math.floor(window.innerWidth / COLS);
+        setCellSize(computed);
 
-  const COLS = 8;
-  const ROWS = 12;
-  const circleSize = cellSize * 0.88; // circle takes 88% of the cell, leaving ~12% gap
+        // Adventurous is at col=4, row=4
+        // getPos gives: x = (4 - 4.5) * computed = -0.5 * computed
+        // To center it on screen we negate that offset, multiplied by initial scale
+        const adventurousOffsetX = 0.5 * computed * 2.5;
+        const adventurousOffsetY = 0.5 * computed * 2.5;
+        setPosition({ x: adventurousOffsetX, y: adventurousOffsetY });
+      };
+
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+  const circleSize = cellSize * 0.9;
+
+  const getMoodColor = (mood: typeof moods[0]) => {
+    const col = colMap[String(mood.position.x)] ?? 0;
+    const row = rowMap[String(mood.position.y)] ?? 0;
+    const hue = ((col / (COLS - 1)) + (row / (ROWS - 1))) / 2 * 360;
+    return `hsl(${hue}, 85%, 55%)`;
+  };
 
   const getPos = (mood: typeof moods[0]) => {
-    const col = colMap[mood.position.x] ?? 0;
-    const row = rowMap[mood.position.y] ?? 0;
-    // Center the grid: offset so grid is centered at origin
+    const col = colMap[String(mood.position.x)] ?? 0;
+    const row = rowMap[String(mood.position.y)] ?? 0;
     const x = (col - (COLS - 1) / 2) * cellSize;
     const y = (row - (ROWS - 1) / 2) * cellSize;
     return { x, y };
+  };
+
+  const getShape = (index: number) => morphShapes[index % morphShapes.length];
+
+  const getClampedPosition = (x: number, y: number, currentScale: number) => {
+    const gridWidth = COLS * cellSize * currentScale;
+    const gridHeight = ROWS * cellSize * currentScale;
+    const maxX = Math.max(0, gridWidth / 2 - window.innerWidth / 2);
+    const maxY = Math.max(0, gridHeight / 2 - window.innerHeight / 2);
+    return {
+      x: Math.min(maxX, Math.max(-maxX, x)),
+      y: Math.min(maxY, Math.max(-maxY, y)),
+    };
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -57,7 +97,8 @@ export default function Home() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+    const raw = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
+    setPosition(getClampedPosition(raw.x, raw.y, scale));
   };
 
   const handleMouseUp = () => setIsDragging(false);
@@ -72,7 +113,8 @@ export default function Home() {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const touch = e.touches[0];
-    setPosition({ x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y });
+    const raw = { x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y };
+    setPosition(getClampedPosition(raw.x, raw.y, scale));
   };
 
   const handleTouchEnd = () => setIsDragging(false);
@@ -84,12 +126,20 @@ export default function Home() {
       if (e.ctrlKey) {
         e.preventDefault();
         const delta = e.deltaY * -0.01;
-        setScale(prev => Math.min(Math.max(0.3, prev + delta), 2));
+        const minScale = Math.max(
+          window.innerWidth / (COLS * cellSize),
+          window.innerHeight / (ROWS * cellSize)
+        );
+        setScale(prev => {
+          const next = Math.min(Math.max(minScale, prev + delta), 4);
+          setPosition(pos => getClampedPosition(pos.x, pos.y, next));
+          return next;
+        });
       }
     };
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, []);
+  }, [cellSize]);
 
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
@@ -139,36 +189,56 @@ export default function Home() {
         >
           {moods.map((mood, index) => {
             const pos = getPos(mood);
+            const color = getMoodColor(mood);
+            const shape = getShape(index);
+            const isHovered = hoveredId === mood.id;
+
             return (
-              <motion.button
+              <div
                 key={mood.id}
-                className="mood-circle absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center cursor-pointer shadow-2xl"
+                className="mood-circle absolute"
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
                   width: `${circleSize}px`,
                   height: `${circleSize}px`,
-                  backgroundColor: mood.color,
+                  transform: 'translate(-50%, -50%)',
                 }}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  delay: index * 0.02,
-                  duration: 0.6,
-                  type: 'spring',
-                  stiffness: 100,
-                }}
-                whileHover={{ scale: 1.12, transition: { duration: 0.2 } }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleMoodClick(mood.id)}
               >
-                <span
-                  className="text-white font-light tracking-wide pointer-events-none select-none text-center px-1 leading-tight"
-                  style={{ fontSize: `${circleSize * 0.12}px` }}
+                <motion.button
+                  className="w-full h-full flex items-center justify-center cursor-pointer"
+                  style={{
+                    backgroundColor: color,
+                    borderRadius: isHovered ? shape.hover : '50%',
+                    rotate: isHovered ? shape.rotate : '0deg',
+                    boxShadow: 'none',
+                    transition: 'border-radius 0.5s cubic-bezier(0.34,1.4,0.64,1), rotate 0.5s cubic-bezier(0.34,1.4,0.64,1)',
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: index * 0.02,
+                    duration: 0.6,
+                    type: 'spring',
+                    stiffness: 100,
+                  }}
+                  onMouseEnter={() => setHoveredId(mood.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  onClick={() => handleMoodClick(mood.id)}
                 >
-                  {mood.name}
-                </span>
-              </motion.button>
+                  <span
+                    className="text-white font-light tracking-wide pointer-events-none select-none text-center px-1 leading-tight"
+                    style={{
+                      fontSize: `${circleSize * 0.12}px`,
+                      display: 'inline-block',
+                      rotate: isHovered ? `-${shape.rotate}` : '0deg',
+                      transition: 'rotate 0.5s cubic-bezier(0.34,1.4,0.64,1)',
+                    }}
+                  >
+                    {mood.name}
+                  </span>
+                </motion.button>
+              </div>
             );
           })}
         </motion.div>
