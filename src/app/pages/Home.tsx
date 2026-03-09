@@ -4,15 +4,15 @@ import { motion } from 'motion/react';
 import { moods } from '../data/moods';
 
 const morphShapes = [
-  { hover: "50% 20% 50% 20% / 20% 50% 20% 50%", rotate: "15deg" },   // starburst
-  { hover: "50% 50% 50% 50% / 60% 60% 40% 40%", rotate: "0deg" },    // clover
-  { hover: "50% 50% 0% 0% / 100% 100% 0% 0%",   rotate: "0deg" },    // arch
-  { hover: "50% 50% 50% 50% / 8% 8% 92% 92%",   rotate: "0deg" },    // hourglass
-  { hover: "30% 70% 70% 30% / 70% 30% 30% 70%", rotate: "0deg" },    // scallop
-  { hover: "60% 40% 30% 70% / 40% 50% 60% 50%", rotate: "-6deg" },   // blob
-  { hover: "50% 50% 8% 8% / 50% 50% 8% 8%",     rotate: "0deg" },    // tombstone
-  { hover: "50% 0% 50% 0%",                       rotate: "0deg" },    // corner
-  { hover: "40% 10% 40% 10% / 10% 40% 10% 40%", rotate: "22deg" },   // spike
+  { hover: "50% 20% 50% 20% / 20% 50% 20% 50%", rotate: "15deg" },
+  { hover: "50% 50% 50% 50% / 60% 60% 40% 40%", rotate: "0deg" },
+  { hover: "50% 50% 0% 0% / 100% 100% 0% 0%",   rotate: "0deg" },
+  { hover: "50% 50% 50% 50% / 8% 8% 92% 92%",   rotate: "0deg" },
+  { hover: "30% 70% 70% 30% / 70% 30% 30% 70%", rotate: "0deg" },
+  { hover: "60% 40% 30% 70% / 40% 50% 60% 50%", rotate: "-6deg" },
+  { hover: "50% 50% 8% 8% / 50% 50% 8% 8%",     rotate: "0deg" },
+  { hover: "50% 0% 50% 0%",                       rotate: "0deg" },
+  { hover: "40% 10% 40% 10% / 10% 40% 10% 40%", rotate: "22deg" },
 ];
 
 export default function Home() {
@@ -41,31 +41,45 @@ export default function Home() {
     '100': 5, '300': 6, '500': 7, '700': 8, '900': 9
   };
 
-    useEffect(() => {
-      const handleResize = () => {
-        const computed = Math.floor(window.innerWidth / COLS);
-        setCellSize(computed);
+  useEffect(() => {
+    const handleResize = () => {
+      const computed = Math.floor(window.innerWidth / COLS);
+      setCellSize(computed);
+      const offsetX = 0.5 * computed * 1.5;
+      const offsetY = 0.5 * computed * 1.5;
+      setPosition({ x: offsetX, y: offsetY });
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-        // Adventurous is at col=4, row=4
-        // getPos gives: x = (4 - 4.5) * computed = -0.5 * computed
-        // To center it on screen we negate that offset, multiplied by initial scale
-        const adventurousOffsetX = 0.5 * computed * 2.5;
-        const adventurousOffsetY = 0.5 * computed * 2.5;
-        setPosition({ x: adventurousOffsetX, y: adventurousOffsetY });
-      };
-
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-  const circleSize = cellSize * 0.9;
+  const circleSize = cellSize * 0.72;
 
   const getMoodColor = (mood: typeof moods[0]) => {
     const col = colMap[String(mood.position.x)] ?? 0;
     const row = rowMap[String(mood.position.y)] ?? 0;
-    const hue = ((col / (COLS - 1)) + (row / (ROWS - 1))) / 2 * 360;
-    return `hsl(${hue}, 85%, 55%)`;
+
+    const tx = col / (COLS - 1); // 0=left, 1=right
+    const ty = row / (ROWS - 1); // 0=top, 1=bottom
+
+    // Four corner hues:
+    // Top-left: Red (0), Top-right: Orange (30)
+    // Bottom-left: Blue (220), Bottom-right: Green (140)
+    const hueTopLeft = 0;
+    const hueTopRight = 30;
+    const hueBottomLeft = 220;
+    const hueBottomRight = 140;
+
+    // Bilinear interpolation across the grid
+    const hueTop = hueTopLeft + (hueTopRight - hueTopLeft) * tx;
+    const hueBottom = hueBottomLeft + (hueBottomRight - hueBottomLeft) * tx;
+    const hue = hueTop + (hueBottom - hueTop) * ty;
+
+    // Slight lightness variation per row for shade depth
+    const lightness = 48 + (row % 3) * 4;
+
+    return `hsl(${hue}, 85%, ${lightness}%)`;
   };
 
   const getPos = (mood: typeof moods[0]) => {
@@ -200,39 +214,51 @@ export default function Home() {
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
-                  width: `${circleSize}px`,
-                  height: `${circleSize}px`,
+                  width: `${circleSize * 1.9}px`,
+                  height: `${circleSize * 1.9}px`,
                   transform: 'translate(-50%, -50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: isHovered ? 10 : 1,
                 }}
               >
                 <motion.button
-                  className="w-full h-full flex items-center justify-center cursor-pointer"
+                  className="flex items-center justify-center cursor-pointer"
                   style={{
                     backgroundColor: color,
                     borderRadius: isHovered ? shape.hover : '50%',
                     rotate: isHovered ? shape.rotate : '0deg',
                     boxShadow: 'none',
-                    transition: 'border-radius 0.5s cubic-bezier(0.34,1.4,0.64,1), rotate 0.5s cubic-bezier(0.34,1.4,0.64,1)',
+                    transition: [
+                      'border-radius 0.45s cubic-bezier(0.34,1.4,0.64,1)',
+                      'rotate 0.45s cubic-bezier(0.34,1.4,0.64,1)',
+                      'width 0.35s cubic-bezier(0.34,1.4,0.64,1)',
+                      'height 0.35s cubic-bezier(0.34,1.4,0.64,1)',
+                    ].join(', '),
+                    width: isHovered ? `${circleSize * 1.8}px` : `${circleSize}px`,
+                    height: isHovered ? `${circleSize * 1.8}px` : `${circleSize}px`,
                   }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
-                    delay: index * 0.02,
-                    duration: 0.6,
+                    delay: index * 0.015,
+                    duration: 0.5,
                     type: 'spring',
-                    stiffness: 100,
+                    stiffness: 120,
                   }}
                   onMouseEnter={() => setHoveredId(mood.id)}
                   onMouseLeave={() => setHoveredId(null)}
+                  onTouchStart={() => setHoveredId(mood.id)}
                   onClick={() => handleMoodClick(mood.id)}
                 >
                   <span
-                    className="text-white font-light tracking-wide pointer-events-none select-none text-center px-1 leading-tight"
+                    className="text-black font-semibold tracking-wide pointer-events-none select-none text-center px-2 leading-tight"
                     style={{
-                      fontSize: `${circleSize * 0.12}px`,
+                      fontSize: isHovered ? `${circleSize * 0.18}px` : `${circleSize * 0.13}px`,
                       display: 'inline-block',
                       rotate: isHovered ? `-${shape.rotate}` : '0deg',
-                      transition: 'rotate 0.5s cubic-bezier(0.34,1.4,0.64,1)',
+                      transition: 'rotate 0.45s cubic-bezier(0.34,1.4,0.64,1), font-size 0.35s ease',
                     }}
                   >
                     {mood.name}
@@ -244,7 +270,13 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <div className="fixed inset-0 pointer-events-none bg-gradient-radial from-transparent via-transparent to-black/80" />
+      {/* Subtle vignette on sides only */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.5) 100%)',
+        }}
+      />
     </div>
   );
 }
