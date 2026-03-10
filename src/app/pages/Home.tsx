@@ -411,9 +411,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom info bar — mobile only */}
+      {/* Bottom info bar — hidden */}
       <div
-        className="md:hidden"
+        className="hidden"
         style={{
           position: 'fixed',
           bottom: 0,
