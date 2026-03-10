@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { motion } from 'motion/react';
 import { moods } from '../data/moods';
 
 const morphShapes = [
@@ -15,268 +14,380 @@ const morphShapes = [
   { hover: "40% 10% 40% 10% / 10% 40% 10% 40%", rotate: "22deg" },
 ];
 
+const COLS = 10;
+const ROWS = 10;
+
+const colMap: Record<string, number> = {
+  '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
+  '0': 4,
+  '100': 5, '200': 5, '300': 6, '400': 6,
+  '500': 7, '600': 7, '700': 8, '800': 8, '900': 9
+};
+
+const rowMap: Record<string, number> = {
+  '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
+  '0': 4,
+  '100': 5, '300': 6, '500': 7, '700': 8, '900': 9
+};
+
+// Color logic:
+// Top half:    left=deep red → center=light coral/salmon → right=deep orange
+// Bottom half: left=deep indigo-blue → center=light sky blue → right=deep green
+// Both hue AND lightness shift smoothly — each circle is unique, no checkerboard
+function getMoodColor(col: number, row: number): string {
+  const isTop = row < ROWS / 2;
+  const tx = col / (COLS - 1); // 0=left, 1=right
+
+  // Within each half, row position (ty) also affects lightness slightly
+  const ty = isTop
+    ? (row / (ROWS / 2 - 1))          // 0=top edge, 1=middle
+    : ((row - ROWS / 2) / (ROWS / 2 - 1)); // 0=middle, 1=bottom edge
+
+  let hue: number;
+  let saturation: number;
+  let lightness: number;
+
+  if (isTop) {
+    // Hue: deep red (355°) left → warm orange (28°) right
+    hue = 355 + tx * 33;
+    if (hue > 360) hue -= 360;
+    saturation = 90;
+    // Lightness: dark at edges, gradually lighter toward center meeting line
+    // Also slight variation per row
+    lightness = 38 + tx * 14 + ty * 12; // 38% far left → ~64% toward center-right
+  } else {
+    // Hue: indigo-blue (242°) left → emerald green (148°) right
+    hue = 242 - tx * 94;
+    saturation = 72;
+    // Lightness: dark at edges, lighter toward center
+    lightness = 40 + tx * 18 + (1 - ty) * 10;
+  }
+
+  return `hsl(${Math.round(hue)}, ${saturation}%, ${Math.round(lightness)}%)`;
+}
+
+function getGridPos(mood: typeof moods[0], cellSize: number) {
+  const col = colMap[String(mood.position.x)] ?? 0;
+  const row = rowMap[String(mood.position.y)] ?? 0;
+  const stagger = (row % 2 === 1) ? cellSize * 0.5 : 0;
+  return {
+    x: (col - (COLS - 1) / 2) * cellSize + stagger,
+    y: (row - (ROWS - 1) / 2) * cellSize,
+    col,
+    row,
+  };
+}
+
 export default function Home() {
   const navigate = useNavigate();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1.5);
-  const [cellSize, setCellSize] = useState(200);
-  const [hoveredId, setHoveredId] = useState<string | null>('adventurous');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const COLS = 10;
-  const ROWS = 10;
+  const [cellSize, setCellSize] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const colMap: Record<string, number> = {
-    '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
-    '0': 4,
-    '100': 5, '200': 5, '300': 6, '400': 6,
-    '500': 7, '600': 7, '700': 8, '800': 8, '900': 9
-  };
-
-  const rowMap: Record<string, number> = {
-    '-900': 0, '-700': 1, '-500': 2, '-300': 3, '-100': 4,
-    '0': 4,
-    '100': 5, '300': 6, '500': 7, '700': 8, '900': 9
-  };
+  const isDragging = useRef(false);
+  const didDrag = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const posRef = useRef({ x: 0, y: 0 });
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const animFrameRef = useRef<number>(0);
 
   useEffect(() => {
-    const handleResize = () => {
-      const computed = Math.floor(window.innerWidth / COLS);
-      setCellSize(computed);
-      const offsetX = 0.5 * computed * 1.5;
-      const offsetY = 0.5 * computed * 1.5;
-      setPosition({ x: offsetX, y: offsetY });
+    const compute = () => {
+      const cs = Math.floor(window.innerWidth / COLS);
+      setCellSize(cs);
+      const ox = cs * 0.5;
+      const oy = cs * 0.5;
+      setPosition({ x: ox, y: oy });
+      posRef.current = { x: ox, y: oy };
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
   }, []);
 
-  const circleSize = cellSize * 0.72;
+  // 92% fill — very tight with tiny black gap
+  const circleSize = cellSize * 0.96;
+  const activeSize = circleSize * 1.35;
 
-  const getMoodColor = (mood: typeof moods[0]) => {
-    const col = colMap[String(mood.position.x)] ?? 0;
-    const row = rowMap[String(mood.position.y)] ?? 0;
-
-    const tx = col / (COLS - 1); // 0=left, 1=right
-    const ty = row / (ROWS - 1); // 0=top, 1=bottom
-
-    // Four corner hues:
-    // Top-left: Red (0), Top-right: Orange (30)
-    // Bottom-left: Blue (220), Bottom-right: Green (140)
-    const hueTopLeft = 0;
-    const hueTopRight = 30;
-    const hueBottomLeft = 220;
-    const hueBottomRight = 140;
-
-    // Bilinear interpolation across the grid
-    const hueTop = hueTopLeft + (hueTopRight - hueTopLeft) * tx;
-    const hueBottom = hueBottomLeft + (hueBottomRight - hueBottomLeft) * tx;
-    const hue = hueTop + (hueBottom - hueTop) * ty;
-
-    // Slight lightness variation per row for shade depth
-    const lightness = 48 + (row % 3) * 4;
-
-    return `hsl(${hue}, 85%, ${lightness}%)`;
-  };
-
-  const getPos = (mood: typeof moods[0]) => {
-    const col = colMap[String(mood.position.x)] ?? 0;
-    const row = rowMap[String(mood.position.y)] ?? 0;
-    const x = (col - (COLS - 1) / 2) * cellSize;
-    const y = (row - (ROWS - 1) / 2) * cellSize;
-    return { x, y };
-  };
-
-  const getShape = (index: number) => morphShapes[index % morphShapes.length];
-
-  const getClampedPosition = (x: number, y: number, currentScale: number) => {
-    const gridWidth = COLS * cellSize * currentScale;
-    const gridHeight = ROWS * cellSize * currentScale;
-    const maxX = Math.max(0, gridWidth / 2 - window.innerWidth / 2);
-    const maxY = Math.max(0, gridHeight / 2 - window.innerHeight / 2);
+  function clamp(x: number, y: number) {
+    // Extra padding so corner/edge circles are fully visible with black space around them
+    const padding = cellSize * 1.5;
+    const maxX = (COLS * cellSize) / 2 - window.innerWidth / 2 + padding;
+    const maxY = (ROWS * cellSize) / 2 - window.innerHeight / 2 + padding;
     return {
       x: Math.min(maxX, Math.max(-maxX, x)),
       y: Math.min(maxY, Math.max(-maxY, y)),
     };
-  };
+  }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.mood-circle')) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const raw = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
-    setPosition(getClampedPosition(raw.x, raw.y, scale));
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.mood-circle')) return;
-    setIsDragging(true);
-    const touch = e.touches[0];
-    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const touch = e.touches[0];
-    const raw = { x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y };
-    setPosition(getClampedPosition(raw.x, raw.y, scale));
-  };
-
-  const handleTouchEnd = () => setIsDragging(false);
-
-  const handleMoodClick = (moodId: string) => navigate(`/mood/${moodId}`);
-
+  // Mouse-follow panning — grid drifts toward where mouse is pointing
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const delta = e.deltaY * -0.01;
-        const minScale = Math.max(
-          window.innerWidth / (COLS * cellSize),
-          window.innerHeight / (ROWS * cellSize)
-        );
-        setScale(prev => {
-          const next = Math.min(Math.max(minScale, prev + delta), 4);
-          setPosition(pos => getClampedPosition(pos.x, pos.y, next));
-          return next;
-        });
-      }
-    };
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
+    if (cellSize === 0) return;
+    const speed = 5;
+
+    function tick() {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      // Normalised offset from center (-1 to 1)
+      const nx = (mouseRef.current.x - cx) / cx;
+      const ny = (mouseRef.current.y - cy) / cy;
+      // Cubic curve — slow in middle, accelerates toward edges so corners are reachable
+      const ex = Math.sign(nx) * Math.pow(Math.abs(nx), 1.8);
+      const ey = Math.sign(ny) * Math.pow(Math.abs(ny), 1.8);
+      const newX = posRef.current.x - ex * speed;
+      const newY = posRef.current.y - ey * speed;
+      const clamped = clamp(newX, newY);
+      posRef.current = clamped;
+      setPosition({ ...clamped });
+      animFrameRef.current = requestAnimationFrame(tick);
+    }
+
+    animFrameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animFrameRef.current);
   }, [cellSize]);
+
+  function onMouseMove(e: React.MouseEvent) {
+    mouseRef.current = { x: e.clientX, y: e.clientY };
+    // Also support click-drag as fallback
+    if (isDragging.current) {
+      didDrag.current = true;
+    }
+  }
+
+  function onMouseDown(e: React.MouseEvent) {
+    isDragging.current = true;
+    didDrag.current = false;
+    dragStart.current = { x: e.clientX - posRef.current.x, y: e.clientY - posRef.current.y };
+  }
+
+  function onMouseUp() { isDragging.current = false; }
+
+  function onTouchStart(e: React.TouchEvent) {
+    isDragging.current = true;
+    didDrag.current = false;
+    const t = e.touches[0];
+    dragStart.current = { x: t.clientX - posRef.current.x, y: t.clientY - posRef.current.y };
+    mouseRef.current = { x: t.clientX, y: t.clientY };
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!isDragging.current) return;
+    didDrag.current = true;
+    const t = e.touches[0];
+    mouseRef.current = { x: t.clientX, y: t.clientY };
+    const clamped = clamp(t.clientX - dragStart.current.x, t.clientY - dragStart.current.y);
+    posRef.current = clamped;
+    setPosition(clamped);
+  }
+
+  function onTouchEnd() { isDragging.current = false; }
+
+  function handleCircleInteract(moodId: string) {
+    if (didDrag.current) return;
+    if (activeId === moodId) {
+      navigate(`/mood/${moodId}`);
+    } else {
+      setActiveId(moodId);
+    }
+  }
+
+  const activeMood = moods.find(m => m.id === activeId) ?? null;
+  const activeMoodPos = activeMood ? getGridPos(activeMood, cellSize) : null;
+  const activeMoodColor = activeMoodPos
+    ? getMoodColor(activeMoodPos.col, activeMoodPos.row)
+    : 'white';
+
+  if (cellSize === 0) return <div className="w-screen h-screen bg-black" />;
 
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
-      <header className="fixed top-0 left-0 right-0 z-50 p-6 md:p-12">
-        <div className="flex items-center justify-between">
-          <h1 className="text-white text-2xl md:text-3xl tracking-tight">
-            mood<span className="text-white/40">/</span>film
-          </h1>
-          <p className="hidden md:block text-white/50 text-sm tracking-wide">
-            Explore by feeling
-          </p>
-        </div>
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between">
+        <h1 className="text-white text-2xl tracking-tight font-light">
+          mood<span className="text-white/30">/</span>film
+        </h1>
+        <p className="hidden md:block text-white/40 text-xs tracking-widest uppercase">
+          Explore by feeling
+        </p>
       </header>
 
-      <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-white/40 text-xs md:text-sm text-center tracking-wide px-4"
-        >
-          Drag to explore • Tap a mood to discover films • Pinch to zoom
-        </motion.p>
-      </div>
-
+      {/* Draggable canvas — drag works everywhere */}
       <div
         ref={containerRef}
         className="absolute inset-0"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{ cursor: isDragging.current ? 'grabbing' : 'grab', touchAction: 'none' }}
       >
-        <motion.div
-          className="absolute"
+        <div
           style={{
+            position: 'absolute',
             left: '50%',
             top: '50%',
-            x: position.x,
-            y: position.y,
-            scale: scale,
+            transform: `translate(${position.x}px, ${position.y}px)`,
           }}
         >
           {moods.map((mood, index) => {
-            const pos = getPos(mood);
-            const color = getMoodColor(mood);
-            const shape = getShape(index);
-            const isHovered = hoveredId === mood.id;
+            const { x, y, col, row } = getGridPos(mood, cellSize);
+            const color = getMoodColor(col, row);
+            const shape = morphShapes[index % morphShapes.length];
+            const isActive = activeId === mood.id;
+            const size = isActive ? activeSize : circleSize;
+
+            // Circles ripple away from active one — gentle nudge, not a shove
+            let pushX = 0;
+            let pushY = 0;
+            if (activeMoodPos && !isActive) {
+              const dx = x - activeMoodPos.x;
+              const dy = y - activeMoodPos.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist > 0) {
+                const maxPush = cellSize * 0.35; // gentle — just enough to show space
+                const falloff = cellSize * 3.5;
+                const strength = maxPush / (1 + (dist / falloff) * (dist / falloff));
+                pushX = (dx / dist) * strength;
+                pushY = (dy / dist) * strength;
+              }
+            }
 
             return (
               <div
                 key={mood.id}
-                className="mood-circle absolute"
                 style={{
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
-                  width: `${circleSize * 1.9}px`,
-                  height: `${circleSize * 1.9}px`,
+                  position: 'absolute',
+                  left: x + pushX,
+                  top: y + pushY,
+                  width: activeSize,
+                  height: activeSize,
                   transform: 'translate(-50%, -50%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  zIndex: isHovered ? 10 : 1,
+                  zIndex: isActive ? 20 : 1,
+                  transition: 'left 0.4s cubic-bezier(0.34,1.4,0.64,1), top 0.4s cubic-bezier(0.34,1.4,0.64,1)',
                 }}
               >
-                <motion.button
-                  className="flex items-center justify-center cursor-pointer"
+                <div
+                  onMouseEnter={() => { if (!isDragging.current) setActiveId(mood.id); }}
+                  onMouseLeave={() => setActiveId(null)}
+                  onClick={() => handleCircleInteract(mood.id)}
                   style={{
+                    width: size,
+                    height: size,
                     backgroundColor: color,
-                    borderRadius: isHovered ? shape.hover : '50%',
-                    rotate: isHovered ? shape.rotate : '0deg',
-                    boxShadow: 'none',
+                    borderRadius: isActive ? shape.hover : '50%',
+                    rotate: isActive ? shape.rotate : '0deg',
                     transition: [
-                      'border-radius 0.45s cubic-bezier(0.34,1.4,0.64,1)',
-                      'rotate 0.45s cubic-bezier(0.34,1.4,0.64,1)',
-                      'width 0.35s cubic-bezier(0.34,1.4,0.64,1)',
-                      'height 0.35s cubic-bezier(0.34,1.4,0.64,1)',
+                      'width 0.4s cubic-bezier(0.34,1.4,0.64,1)',
+                      'height 0.4s cubic-bezier(0.34,1.4,0.64,1)',
+                      'border-radius 0.4s cubic-bezier(0.34,1.4,0.64,1)',
+                      'rotate 0.4s cubic-bezier(0.34,1.4,0.64,1)',
                     ].join(', '),
-                    width: isHovered ? `${circleSize * 1.8}px` : `${circleSize}px`,
-                    height: isHovered ? `${circleSize * 1.8}px` : `${circleSize}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
                   }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    delay: index * 0.015,
-                    duration: 0.5,
-                    type: 'spring',
-                    stiffness: 120,
-                  }}
-                  onMouseEnter={() => setHoveredId(mood.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onTouchStart={() => setHoveredId(mood.id)}
-                  onClick={() => handleMoodClick(mood.id)}
                 >
                   <span
-                    className="text-black font-semibold tracking-wide pointer-events-none select-none text-center px-2 leading-tight"
                     style={{
-                      fontSize: isHovered ? `${circleSize * 0.18}px` : `${circleSize * 0.13}px`,
+                      color: '#111',
+                      fontWeight: isActive ? '700' : '500',
+                      fontSize: isActive ? circleSize * 0.16 : circleSize * 0.13,
+                      textAlign: 'center',
+                      padding: '0 6px',
+                      lineHeight: 1.2,
+                      userSelect: 'none',
+                      pointerEvents: 'none',
+                      rotate: isActive ? `-${shape.rotate}` : '0deg',
+                      transition: 'font-size 0.4s ease, rotate 0.4s ease',
                       display: 'inline-block',
-                      rotate: isHovered ? `-${shape.rotate}` : '0deg',
-                      transition: 'rotate 0.45s cubic-bezier(0.34,1.4,0.64,1), font-size 0.35s ease',
                     }}
                   >
                     {mood.name}
                   </span>
-                </motion.button>
+                </div>
               </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
 
-      {/* Subtle vignette on sides only */}
+      {/* Bottom info bar — mobile only */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="md:hidden"
         style={{
-          background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.5) 100%)',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          padding: '0 16px 28px',
+          transform: activeMood ? 'translateY(0)' : 'translateY(120%)',
+          transition: 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1)',
+          pointerEvents: activeMood ? 'auto' : 'none',
         }}
-      />
+      >
+        <div
+          style={{
+            background: 'rgba(25,25,25,0.96)',
+            backdropFilter: 'blur(16px)',
+            borderRadius: 24,
+            padding: '18px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{
+              color: activeMoodColor,
+              fontWeight: '700',
+              fontSize: 18,
+              margin: '0 0 4px 0',
+              transition: 'color 0.3s ease',
+            }}>
+              {activeMood?.name}
+            </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: 14,
+              margin: 0,
+              lineHeight: 1.4,
+            }}>
+              {activeMood?.movies?.[0]?.description ?? 'Tap again to explore films'}
+            </p>
+          </div>
+          <button
+            onClick={() => activeMood && navigate(`/mood/${activeMood.id}`)}
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: '50%',
+              background: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
