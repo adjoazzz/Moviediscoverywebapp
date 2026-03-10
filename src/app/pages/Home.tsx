@@ -51,16 +51,16 @@ function getMoodColor(col: number, row: number): string {
     // Hue: deep red (355°) left → warm orange (28°) right
     hue = 355 + tx * 33;
     if (hue > 360) hue -= 360;
-    saturation = 90;
+    saturation = 75;
     // Lightness: dark at edges, gradually lighter toward center meeting line
     // Also slight variation per row
-    lightness = 38 + tx * 14 + ty * 12; // 38% far left → ~64% toward center-right
+    lightness = 44 + tx * 14 + ty * 10; // red: slightly gentler dark edge
   } else {
     // Hue: indigo-blue (242°) left → emerald green (148°) right
-    hue = 242 - tx * 94;
-    saturation = 72;
+    hue = 242 - tx * 110; // 242° blue left → 132° proper green right (was 148° teal)
+    saturation = 68;
     // Lightness: dark at edges, lighter toward center
-    lightness = 40 + tx * 18 + (1 - ty) * 10;
+    lightness = 52 + tx * 18 + (1 - ty) * 10; // blue: slightly gentler dark edge
   }
 
   return `hsl(${Math.round(hue)}, ${saturation}%, ${Math.round(lightness)}%)`;
@@ -185,11 +185,38 @@ export default function Home() {
 
   function onMouseUp() { isDragging.current = false; }
 
+  // Finds which circle (if any) is under the given screen coordinates
+  function getCircleUnderTouch(clientX: number, clientY: number): string | null {
+    // Convert screen coords to grid coords
+    const gridX = clientX - window.innerWidth / 2 - posRef.current.x;
+    const gridY = clientY - window.innerHeight / 2 - posRef.current.y;
+
+    let closest: string | null = null;
+    let closestDist = Infinity;
+
+    moods.forEach((mood) => {
+      const { x, y } = getGridPos(mood, cellSize);
+      const dx = gridX - x;
+      const dy = gridY - y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Check if within circle radius
+      if (dist < (cellSize * 0.48) && dist < closestDist) {
+        closestDist = dist;
+        closest = mood.id;
+      }
+    });
+
+    return closest;
+  }
+
   function onTouchStart(e: React.TouchEvent) {
     isDragging.current = true;
     didDrag.current = false;
     const t = e.touches[0];
     dragStart.current = { x: t.clientX - posRef.current.x, y: t.clientY - posRef.current.y };
+    // Immediately morph circle under finger
+    const hit = getCircleUnderTouch(t.clientX, t.clientY);
+    if (hit) setActiveId(hit);
   }
 
   function onTouchMove(e: React.TouchEvent) {
@@ -199,12 +226,23 @@ export default function Home() {
     const clamped = clamp(t.clientX - dragStart.current.x, t.clientY - dragStart.current.y);
     posRef.current = clamped;
     setPosition(clamped);
+    // As finger moves, morph whatever circle it's over
+    const hit = getCircleUnderTouch(t.clientX, t.clientY);
+    setActiveId(hit);
   }
 
-  function onTouchEnd() { isDragging.current = false; }
+  function onTouchEnd() {
+    isDragging.current = false;
+    // If it was a tap (not a drag), navigate to active mood
+    if (!didDrag.current && activeId) {
+      navigate(`/mood/${activeId}`);
+    }
+    setActiveId(null);
+  }
 
   function handleCircleInteract(moodId: string) {
     if (didDrag.current) return;
+    // Desktop click: tap once to activate, tap again to navigate
     if (activeId === moodId) {
       navigate(`/mood/${moodId}`);
     } else {
