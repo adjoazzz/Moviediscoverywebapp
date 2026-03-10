@@ -113,8 +113,9 @@ export default function Home() {
   }, []);
 
   // 92% fill — very tight with tiny black gap
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const circleSize = cellSize * 0.96;
-  const activeSize = circleSize * 1.35;
+  const activeSize = circleSize * (isMobile ? 1.7 : 1.35);
 
   function clamp(x: number, y: number) {
     // Extra padding so corner/edge circles are fully visible with black space around them
@@ -129,6 +130,37 @@ export default function Home() {
 
   const mouseMoveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mouseMoving = useRef(false);
+  const audioCtx = useRef<AudioContext | null>(null);
+  const lastHapticId = useRef<string | null>(null);
+
+  function triggerFeedback(moodId: string) {
+    if (moodId === lastHapticId.current) return;
+    lastHapticId.current = moodId;
+
+    // Haptics — works on Android, silent fail on iOS
+    if (navigator.vibrate) {
+      navigator.vibrate(8); // very short, subtle pulse
+    }
+
+    // Sound — soft subtle 'pop' tone
+    try {
+      if (!audioCtx.current) {
+        audioCtx.current = new AudioContext();
+      }
+      const ctx = audioCtx.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (_) {}
+  }
 
   // Mouse-follow — only active while mouse is actually moving
   useEffect(() => {
@@ -216,7 +248,7 @@ export default function Home() {
     dragStart.current = { x: t.clientX - posRef.current.x, y: t.clientY - posRef.current.y };
     // Immediately morph circle under finger
     const hit = getCircleUnderTouch(t.clientX, t.clientY);
-    if (hit) setActiveId(hit);
+    if (hit) { setActiveId(hit); triggerFeedback(hit); }
   }
 
   function onTouchMove(e: React.TouchEvent) {
@@ -229,6 +261,7 @@ export default function Home() {
     // As finger moves, morph whatever circle it's over
     const hit = getCircleUnderTouch(t.clientX, t.clientY);
     setActiveId(hit);
+    if (hit) triggerFeedback(hit);
   }
 
   function onTouchEnd() {
@@ -333,7 +366,7 @@ export default function Home() {
                 }}
               >
                 <div
-                  onMouseEnter={() => { if (!isDragging.current) setActiveId(mood.id); }}
+                  onMouseEnter={() => { if (!isDragging.current) { setActiveId(mood.id); triggerFeedback(mood.id); } }}
                   onMouseLeave={() => setActiveId(null)}
                   onClick={() => handleCircleInteract(mood.id)}
                   style={{
