@@ -95,7 +95,12 @@ export default function Home() {
 
   useEffect(() => {
     const compute = () => {
-      const cs = Math.floor(window.innerWidth / COLS);
+      // On mobile: show ~4 circles across so they're big and tappable
+      // On desktop: show full grid width
+      const isMobile = window.innerWidth < 768;
+      const cs = isMobile
+        ? Math.floor(window.innerWidth / 4)   // 4 circles visible across on mobile
+        : Math.floor(window.innerWidth / COLS); // full grid on desktop
       setCellSize(cs);
       const ox = cs * 0.5;
       const oy = cs * 0.5;
@@ -122,25 +127,28 @@ export default function Home() {
     };
   }
 
-  // Mouse-follow panning — grid drifts toward where mouse is pointing
+  const mouseMoveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mouseMoving = useRef(false);
+
+  // Mouse-follow — only active while mouse is actually moving
   useEffect(() => {
     if (cellSize === 0) return;
     const speed = 5;
 
     function tick() {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      // Normalised offset from center (-1 to 1)
-      const nx = (mouseRef.current.x - cx) / cx;
-      const ny = (mouseRef.current.y - cy) / cy;
-      // Cubic curve — slow in middle, accelerates toward edges so corners are reachable
-      const ex = Math.sign(nx) * Math.pow(Math.abs(nx), 1.8);
-      const ey = Math.sign(ny) * Math.pow(Math.abs(ny), 1.8);
-      const newX = posRef.current.x - ex * speed;
-      const newY = posRef.current.y - ey * speed;
-      const clamped = clamp(newX, newY);
-      posRef.current = clamped;
-      setPosition({ ...clamped });
+      if (mouseMoving.current && !isDragging.current) {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const nx = (mouseRef.current.x - cx) / cx;
+        const ny = (mouseRef.current.y - cy) / cy;
+        const ex = Math.sign(nx) * Math.pow(Math.abs(nx), 1.8);
+        const ey = Math.sign(ny) * Math.pow(Math.abs(ny), 1.8);
+        const newX = posRef.current.x - ex * speed;
+        const newY = posRef.current.y - ey * speed;
+        const clamped = clamp(newX, newY);
+        posRef.current = clamped;
+        setPosition({ ...clamped });
+      }
       animFrameRef.current = requestAnimationFrame(tick);
     }
 
@@ -150,15 +158,28 @@ export default function Home() {
 
   function onMouseMove(e: React.MouseEvent) {
     mouseRef.current = { x: e.clientX, y: e.clientY };
-    // Also support click-drag as fallback
+
     if (isDragging.current) {
+      // Click-drag panning
       didDrag.current = true;
+      const clamped = clamp(e.clientX - dragStart.current.x, e.clientY - dragStart.current.y);
+      posRef.current = clamped;
+      setPosition(clamped);
+      return;
     }
+
+    // Mouse-follow: mark as moving, clear after 80ms of stillness
+    mouseMoving.current = true;
+    if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
+    mouseMoveTimer.current = setTimeout(() => {
+      mouseMoving.current = false;
+    }, 80);
   }
 
   function onMouseDown(e: React.MouseEvent) {
     isDragging.current = true;
     didDrag.current = false;
+    mouseMoving.current = false;
     dragStart.current = { x: e.clientX - posRef.current.x, y: e.clientY - posRef.current.y };
   }
 
@@ -169,14 +190,12 @@ export default function Home() {
     didDrag.current = false;
     const t = e.touches[0];
     dragStart.current = { x: t.clientX - posRef.current.x, y: t.clientY - posRef.current.y };
-    mouseRef.current = { x: t.clientX, y: t.clientY };
   }
 
   function onTouchMove(e: React.TouchEvent) {
     if (!isDragging.current) return;
     didDrag.current = true;
     const t = e.touches[0];
-    mouseRef.current = { x: t.clientX, y: t.clientY };
     const clamped = clamp(t.clientX - dragStart.current.x, t.clientY - dragStart.current.y);
     posRef.current = clamped;
     setPosition(clamped);
