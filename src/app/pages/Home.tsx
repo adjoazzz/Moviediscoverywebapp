@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { moods } from '../data/moods';
+import { Analytics } from "@vercel/analytics/react"
 
 const morphShapes = [
   { hover: "50% 20% 50% 20% / 20% 50% 20% 50%", rotate: "15deg" },
@@ -478,6 +479,8 @@ export default function Home() {
           </button>
         </div>
       </div>
+      <Analytics />
     </div>
+
   );
 }
