@@ -9,7 +9,6 @@ interface EnrichedMovie {
   title: string;
   director: string;
   year: number;
-  description: string;
   tmdb: TMDBMovie | null;
 }
 
@@ -179,7 +178,7 @@ export default function MovieList() {
                       {movie.director}
                     </p>
                     <p className="text-white/30 text-xs leading-relaxed line-clamp-2">
-                      {movie.description}
+                      {movie.tmdb?.overview || 'No description available.'}
                     </p>
                   </div>
                 </motion.article>
