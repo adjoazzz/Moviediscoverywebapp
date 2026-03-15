@@ -7,6 +7,7 @@ export interface Movie {
 export interface Mood {
   id: string;
   name: string;
+  description: string;
   color: string;
   zone: 'red' | 'orange' | 'yellow' | 'green' | 'teal' | 'blue' | 'purple' | 'pink';
   position: { x: number; y: number };
@@ -24,6 +25,7 @@ export const moods: Mood[] = [
   // ==================== ROW 1 (y = -900) — RED zone ====================
   {
     id: 'visceral',
+    description: "Raw, physical, gut-level cinema that hits you in the body before the brain.",
     name: 'Visceral',
     color: '#ff0000',
     zone: 'red',
@@ -47,6 +49,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'brutal',
+    description: "Unflinching depictions of violence, war and human cruelty told without looking away.",
     name: 'Brutal',
     color: '#ff0000',
     zone: 'red',
@@ -70,6 +73,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'intense',
+    description: "Films wound so tight they leave you breathless — pressure that never lets up.",
     name: 'Intense',
     color: '#ff0000',
     zone: 'red',
@@ -93,6 +97,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'thrilling',
+    description: "Unpredictable twists, mounting dread and the satisfaction of a puzzle clicking into place.",
     name: 'Thrilling',
     color: '#ff0000',
     zone: 'red',
@@ -117,6 +122,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'relentless',
+    description: "Stories that never slow down — pursuit, momentum and unstoppable force.",
     name: 'Relentless',
     color: '#ff0000',
     zone: 'red',
@@ -140,6 +146,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'chaotic',
+    description: "Disorder, frenzy and lives spiralling beyond anyone's control.",
     name: 'Chaotic',
     color: '#ff4400',
     zone: 'orange',
@@ -163,6 +170,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'rebellious',
+    description: "Films that push back against systems, authority and the way things are supposed to be.",
     name: 'Rebellious',
     color: '#ff4400',
     zone: 'orange',
@@ -186,6 +194,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'frenetic',
+    description: "Kinetic, fast-cut and bursting with energy — cinema that runs on pure adrenaline.",
     name: 'Frenetic',
     color: '#ff4400',
     zone: 'orange',
@@ -200,7 +209,7 @@ export const moods: Mood[] = [
       { title: 'Crank', director: 'Mark Neveldine & Brian Taylor', year: 2006 },
       { title: 'Speed', director: 'Jan de Bont', year: 1994 },
       { title: 'The French Connection', director: 'William Friedkin', year: 1971 },
-      { title: 'Shoot Em Up', director: 'Michael Davis', year: 2007 },
+      { title: "Shoot 'Em Up", director: 'Michael Davis', year: 2007 },
       { title: 'Upgrade', director: 'Leigh Whannell', year: 2018 },
       { title: 'Everything Everywhere All at Once', director: 'Daniel Kwan & Daniel Scheinert', year: 2022 },
       { title: 'The Fall Guy', director: 'David Leitch', year: 2024 },
@@ -209,6 +218,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'electrifying',
+    description: "Neon-lit, pulse-raising films where style and substance crackle together.",
     name: 'Electrifying',
     color: '#ff4400',
     zone: 'orange',
@@ -232,6 +242,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'nerve-wracking',
+    description: "Claustrophobic tension where every choice has catastrophic stakes.",
     name: 'Nerve-Wracking',
     color: '#ff4400',
     zone: 'orange',
@@ -248,7 +259,7 @@ export const moods: Mood[] = [
       { title: 'Green Room', director: 'Jeremy Saulnier', year: 2015 },
       { title: 'The Platform', director: 'Galder Gaztelu-Urrutia', year: 2019 },
       { title: 'Calibre', director: 'Matt Palmer', year: 2018 },
-      { title: 'Dont Breathe', director: 'Fede Álvarez', year: 2016 },
+      { title: "Don't Breathe", director: 'Fede Álvarez', year: 2016 },
       { title: 'Speak No Evil', director: 'Christian Tafdrup', year: 2022 },
       { title: 'No One Will Save You', director: 'Brian Duffield', year: 2023 },
     ]
@@ -257,6 +268,7 @@ export const moods: Mood[] = [
   // ==================== ROW 2 (y = -700) — RED-ORANGE zone ====================
   {
     id: 'vengeful',
+    description: "The cold, consuming drive to make someone pay — and the cost of that obsession.",
     name: 'Vengeful',
     color: '#ff0000',
     zone: 'red',
@@ -280,6 +292,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'gritty',
+    description: "Unpolished, street-level stories steeped in the textures of real hardship.",
     name: 'Gritty',
     color: '#ff0000',
     zone: 'red',
@@ -303,6 +316,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'sinister',
+    description: "A creeping sense that something is deeply, fundamentally wrong.",
     name: 'Sinister',
     color: '#ff0000',
     zone: 'red',
@@ -314,7 +328,7 @@ export const moods: Mood[] = [
       { title: 'Zodiac', director: 'David Fincher', year: 2007 },
       { title: 'Seven', director: 'David Fincher', year: 1995 },
       { title: 'Hereditary', director: 'Ari Aster', year: 2018 },
-      { title: 'Rosemarys Baby', director: 'Roman Polanski', year: 1968 },
+      { title: "Rosemary's Baby", director: 'Roman Polanski', year: 1968 },
       { title: 'Midsommar', director: 'Ari Aster', year: 2019 },
       { title: 'The Wicker Man', director: 'Robin Hardy', year: 1973 },
       { title: 'Audition', director: 'Takashi Miike', year: 1999 },
@@ -326,6 +340,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'menacing',
+    description: "Characters and forces that radiate quiet, controlled danger.",
     name: 'Menacing',
     color: '#ff2200',
     zone: 'red',
@@ -349,6 +364,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'suspenseful',
+    description: "The art of withholding — information doled out just slowly enough to keep you desperate.",
     name: 'Suspenseful',
     color: '#ff3300',
     zone: 'red',
@@ -363,7 +379,7 @@ export const moods: Mood[] = [
       { title: 'Vertigo', director: 'Alfred Hitchcock', year: 1958 },
       { title: 'Tinker Tailor Soldier Spy', director: 'Tomas Alfredson', year: 2011 },
       { title: 'The Conversation', director: 'Francis Ford Coppola', year: 1974 },
-      { title: 'Dont Breathe', director: 'Fede Álvarez', year: 2016 },
+      { title: "Don't Breathe", director: 'Fede Álvarez', year: 2016 },
       { title: 'Gone Girl', director: 'David Fincher', year: 2014 },
       { title: 'Oppenheimer', director: 'Christopher Nolan', year: 2023 },
       { title: 'The Killer', director: 'David Fincher', year: 2023 },
@@ -372,6 +388,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'exhilarating',
+    description: "Pure spectacle and joy of motion — films that make you feel alive in the cinema seat.",
     name: 'Exhilarating',
     color: '#ff5500',
     zone: 'orange',
@@ -395,6 +412,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'uplifting',
+    description: "Stories that remind you of what people are capable of at their best.",
     name: 'Uplifting',
     color: '#ff6600',
     zone: 'orange',
@@ -418,6 +436,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'triumphant',
+    description: "The hard-earned victory — underdogs, long odds and the moment everything pays off.",
     name: 'Triumphant',
     color: '#ff7700',
     zone: 'orange',
@@ -441,6 +460,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'invigorating',
+    description: "Films about ambition, creativity and people operating at the very edge of their ability.",
     name: 'Invigorating',
     color: '#ff8800',
     zone: 'orange',
@@ -464,6 +484,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'vivacious',
+    description: "Colour, song, movement and the irresistible energy of people who love being alive.",
     name: 'Vivacious',
     color: '#ff9900',
     zone: 'orange',
@@ -480,7 +501,7 @@ export const moods: Mood[] = [
       { title: 'Hairspray', director: 'Adam Shankman', year: 2007 },
       { title: 'La La Land', director: 'Damien Chazelle', year: 2016 },
       { title: 'Across the Universe', director: 'Julie Taymor', year: 2007 },
-      { title: 'Singin in the Rain', director: 'Stanley Donen & Gene Kelly', year: 1952 },
+      { title: "Singin' in the Rain", director: 'Stanley Donen & Gene Kelly', year: 1952 },
       { title: 'Wonka', director: 'Paul King', year: 2023 },
       { title: 'Mean Girls', director: 'Samantha Jayne & Arturo Perez Jr.', year: 2024 },
     ]
@@ -489,6 +510,7 @@ export const moods: Mood[] = [
   // ==================== ROW 3 (y = -500) — ORANGE-YELLOW zone ====================
   {
     id: 'provocative',
+    description: "Films that deliberately unsettle, challenge and refuse to let you look away comfortably.",
     name: 'Provocative',
     color: '#ff2200',
     zone: 'red',
@@ -512,6 +534,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'sensual',
+    description: "Desire rendered in light, touch and the charged space between two people.",
     name: 'Sensual',
     color: '#ff3300',
     zone: 'red',
@@ -535,6 +558,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'bittersweet',
+    description: "Joy and sadness held in the same moment — the ache of things that are beautiful because they end.",
     name: 'Bittersweet',
     color: '#ff6600',
     zone: 'orange',
@@ -558,6 +582,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'nostalgic',
+    description: "The golden haze of the past — summers that felt infinite, friendships that defined you.",
     name: 'Nostalgic',
     color: '#ff8800',
     zone: 'orange',
@@ -581,6 +606,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'wistful',
+    description: "Longing for something just out of reach — the lives not lived, the words not spoken.",
     name: 'Wistful',
     color: '#ffaa00',
     zone: 'orange',
@@ -604,6 +630,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'whimsical',
+    description: "Films that live in their own logic — playful, strange and entirely their own world.",
     name: 'Whimsical',
     color: '#ffbb00',
     zone: 'yellow',
@@ -617,7 +644,7 @@ export const moods: Mood[] = [
       { title: 'Amélie', director: 'Jean-Pierre Jeunet', year: 2001 },
       { title: 'Paddington', director: 'Paul King', year: 2014 },
       { title: 'The Grand Budapest Hotel', director: 'Wes Anderson', year: 2014 },
-      { title: 'Pee-wees Big Adventure', director: 'Tim Burton', year: 1985 },
+      { title: "Pee-wee's Big Adventure", director: 'Tim Burton', year: 1985 },
       { title: 'Hugo', director: 'Martin Scorsese', year: 2011 },
       { title: 'Spirited Away', director: 'Hayao Miyazaki', year: 2001 },
       { title: 'Edward Scissorhands', director: 'Tim Burton', year: 1990 },
@@ -627,6 +654,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'jubilant',
+    description: "Pure, uncomplicated celebration — music, dancing and the joy of being together.",
     name: 'Jubilant',
     color: '#ffcc00',
     zone: 'yellow',
@@ -650,6 +678,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'dazzling',
+    description: "Visual spectacle so overwhelming it becomes its own emotion.",
     name: 'Dazzling',
     color: '#ffdd00',
     zone: 'yellow',
@@ -659,7 +688,7 @@ export const moods: Mood[] = [
       { title: 'The Greatest Showman', director: 'Michael Gracey', year: 2017 },
       { title: 'La La Land', director: 'Damien Chazelle', year: 2016 },
       { title: 'The Wizard of Oz', director: 'Victor Fleming', year: 1939 },
-      { title: 'Singin in the Rain', director: 'Stanley Donen & Gene Kelly', year: 1952 },
+      { title: "Singin' in the Rain", director: 'Stanley Donen & Gene Kelly', year: 1952 },
       { title: 'Moulin Rouge!', director: 'Baz Luhrmann', year: 2001 },
       { title: 'Speed Racer', director: 'Wachowskis', year: 2008 },
       { title: 'The Fall', director: 'Tarsem Singh', year: 2006 },
@@ -673,6 +702,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'radiant',
+    description: "Films bathed in light — cinematography that makes the world seem luminous.",
     name: 'Radiant',
     color: '#ffee00',
     zone: 'yellow',
@@ -696,6 +726,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'vibrant',
+    description: "Colour, culture and the explosive energy of worlds rendered in full saturation.",
     name: 'Vibrant',
     color: '#ffff00',
     zone: 'yellow',
@@ -721,6 +752,7 @@ export const moods: Mood[] = [
   // ==================== ROW 4 (y = -300) — YELLOW-GREEN zone ====================
   {
     id: 'melancholic',
+    description: "A beautiful, aching sadness — grief worn lightly, loss felt deeply.",
     name: 'Melancholic',
     color: '#ff0000',
     zone: 'red',
@@ -744,6 +776,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'tender',
+    description: "Films handled with extraordinary care for their characters' interior lives.",
     name: 'Tender',
     color: '#ff4488',
     zone: 'pink',
@@ -767,6 +800,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'romantic',
+    description: "Love in all its forms — longing, connection, sacrifice and the leap toward another person.",
     name: 'Romantic',
     color: '#ff6699',
     zone: 'pink',
@@ -790,6 +824,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'heartwarming',
+    description: "Films that restore your faith in people and leave you feeling held.",
     name: 'Heartwarming',
     color: '#ffaa44',
     zone: 'orange',
@@ -813,6 +848,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'cozy',
+    description: "The cinematic equivalent of a warm drink on a cold night.",
     name: 'Cozy',
     color: '#ffcc44',
     zone: 'yellow',
@@ -822,20 +858,21 @@ export const moods: Mood[] = [
       { title: 'The Holiday', director: 'Nancy Meyers', year: 2006 },
       { title: 'When Harry Met Sally', director: 'Rob Reiner', year: 1989 },
       { title: 'Julie & Julia', director: 'Nora Ephron', year: 2009 },
-      { title: 'Youve Got Mail', director: 'Nora Ephron', year: 1998 },
+      { title: "You've Got Mail", director: 'Nora Ephron', year: 1998 },
       { title: 'Chocolat', director: 'Lasse Hallström', year: 2000 },
       { title: 'Knives Out', director: 'Rian Johnson', year: 2019 },
       { title: 'Pride and Prejudice', director: 'Joe Wright', year: 2005 },
       { title: 'Clue', director: 'Jonathan Lynn', year: 1985 },
       { title: 'Mrs. Doubtfire', director: 'Chris Columbus', year: 1993 },
       { title: 'Little Women', director: 'Greta Gerwig', year: 2019 },
-      { title: 'Harry Potter and the Philosophers Stone', director: 'Chris Columbus', year: 2001 },
+      { title: "Harry Potter and the Philosopher's Stone", director: 'Chris Columbus', year: 2001 },
       { title: 'Paddington', director: 'Paul King', year: 2014 },
       { title: 'Glass Onion', director: 'Rian Johnson', year: 2022 },
     ]
   },
   {
     id: 'hopeful',
+    description: "Stories where the light at the end is real — earned hope rather than easy optimism.",
     name: 'Hopeful',
     color: '#aadd00',
     zone: 'green',
@@ -859,6 +896,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'optimistic',
+    description: "The quiet conviction that things can get better if you're willing to begin again.",
     name: 'Optimistic',
     color: '#88dd00',
     zone: 'green',
@@ -882,6 +920,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'inspiring',
+    description: "People who refused what they were told was impossible — and proved it.",
     name: 'Inspiring',
     color: '#66cc00',
     zone: 'green',
@@ -905,6 +944,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'motivating',
+    description: "Films that make you want to get up and do the thing you've been putting off.",
     name: 'Motivating',
     color: '#44bb00',
     zone: 'green',
@@ -913,7 +953,7 @@ export const moods: Mood[] = [
     movies: [
       { title: 'Coach Carter', director: 'Thomas Carter', year: 2005 },
       { title: 'We Are Marshall', director: 'McG', year: 2006 },
-      { title: 'Miracle', director: 'Gavin OConnor', year: 2004 },
+      { title: 'Miracle', director: "Gavin O'Connor", year: 2004 },
       { title: 'Invictus', director: 'Clint Eastwood', year: 2009 },
       { title: 'Remember the Titans', director: 'Boaz Yakin', year: 2000 },
       { title: 'Any Given Sunday', director: 'Oliver Stone', year: 1999 },
@@ -928,6 +968,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'wholesome',
+    description: "Goodness without irony — films that believe in kindness as a radical act.",
     name: 'Wholesome',
     color: '#22aa00',
     zone: 'green',
@@ -943,8 +984,8 @@ export const moods: Mood[] = [
       { title: 'Babe', director: 'Chris Noonan', year: 1995 },
       { title: 'The Sandlot', director: 'David Mickey Evans', year: 1993 },
       { title: 'Home Alone', director: 'Chris Columbus', year: 1990 },
-      { title: 'Kikis Delivery Service', director: 'Hayao Miyazaki', year: 1989 },
-      { title: 'Its a Wonderful Life', director: 'Frank Capra', year: 1946 },
+      { title: "Kiki's Delivery Service", director: 'Hayao Miyazaki', year: 1989 },
+      { title: 'It"s a Wonderful Life', director: 'Frank Capra', year: 1946 },
       { title: 'Miracle on 34th Street', director: 'George Seaton', year: 1947 },
       { title: 'Migration', director: 'Benjamin Renner', year: 2023 },
     ]
@@ -953,6 +994,7 @@ export const moods: Mood[] = [
   // ==================== ROW 5 (y = -100) — CENTER-LEFT zone ====================
   {
     id: 'disturbing',
+    description: "Films that get under your skin and stay there long after the credits roll.",
     name: 'Disturbing',
     color: '#cc0044',
     zone: 'red',
@@ -976,6 +1018,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'playful',
+    description: "Cinema that treats the screen as a playground — inventive, funny and light on its feet.",
     name: 'Playful',
     color: '#ff66aa',
     zone: 'pink',
@@ -991,7 +1034,7 @@ export const moods: Mood[] = [
       { title: 'The Princess Bride', director: 'Rob Reiner', year: 1987 },
       { title: 'Knives Out', director: 'Rian Johnson', year: 2019 },
       { title: 'The Nice Guys', director: 'Shane Black', year: 2016 },
-      { title: 'Ferris Buellers Day Off', director: 'John Hughes', year: 1986 },
+      { title: "Ferris Bueller's Day Off", director: 'John Hughes', year: 1986 },
       { title: 'Toy Story', director: 'John Lasseter', year: 1995 },
       { title: 'Glass Onion', director: 'Rian Johnson', year: 2022 },
       { title: 'The Taste of Things', director: 'Tran Anh Hung', year: 2023 },
@@ -999,6 +1042,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'delightful',
+    description: "Small pleasures elevated — films that find magic in the everyday.",
     name: 'Delightful',
     color: '#ff88bb',
     zone: 'pink',
@@ -1022,6 +1066,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'charming',
+    description: "Effortlessly likeable films where warmth and wit arrive in equal measure.",
     name: 'Charming',
     color: '#ffaa88',
     zone: 'orange',
@@ -1036,7 +1081,7 @@ export const moods: Mood[] = [
       { title: 'Four Weddings and a Funeral', director: 'Mike Newell', year: 1994 },
       { title: 'The Holiday', director: 'Nancy Meyers', year: 2006 },
       { title: 'La La Land', director: 'Damien Chazelle', year: 2016 },
-      { title: 'Breakfast at Tiffanys', director: 'Blake Edwards', year: 1961 },
+      { title: "Breakfast at Tiffany's", director: 'Blake Edwards', year: 1961 },
       { title: 'A Good Year', director: 'Ridley Scott', year: 2006 },
       { title: 'Letters to Juliet', director: 'Gary Winick', year: 2010 },
       { title: 'Anyone But You', director: 'Will Gluck', year: 2023 },
@@ -1045,6 +1090,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'whimsical-2',
+    description: "Hazy, impressionistic films that operate on the logic of dreams.",
     name: 'Dreamy',
     color: '#aaddaa',
     zone: 'green',
@@ -1068,6 +1114,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'adventurous',
+    description: "The open road, the unknown horizon and the thrill of going somewhere new.",
     name: 'Adventurous',
     color: '#00cc88',
     zone: 'teal',
@@ -1091,6 +1138,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'peaceful',
+    description: "Films that slow the world down and ask you to simply be present.",
     name: 'Peaceful',
     color: '#00bb77',
     zone: 'teal',
@@ -1102,7 +1150,7 @@ export const moods: Mood[] = [
       { title: 'A River Runs Through It', director: 'Robert Redford', year: 1992 },
       { title: 'Nomadland', director: 'Chloé Zhao', year: 2020 },
       { title: 'The Straight Story', director: 'David Lynch', year: 1999 },
-      { title: 'Babettes Feast', director: 'Gabriel Axel', year: 1987 },
+      { title: "Babette's Feast", director: 'Gabriel Axel', year: 1987 },
       { title: 'Isle of Dogs', director: 'Wes Anderson', year: 2018 },
       { title: 'Spring, Summer, Fall, Winter... and Spring', director: 'Kim Ki-duk', year: 2003 },
       { title: 'The Secret World of Arrietty', director: 'Hiromasa Yonebayashi', year: 2010 },
@@ -1114,6 +1162,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'empowering',
+    description: "Stories about people who found their voice — and used it to change something.",
     name: 'Empowering',
     color: '#00aa66',
     zone: 'green',
@@ -1137,6 +1186,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'liberating',
+    description: "The exhilaration of breaking free — from expectation, place and the life assigned to you.",
     name: 'Liberating',
     color: '#009955',
     zone: 'green',
@@ -1160,6 +1210,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'grounded',
+    description: "Cinema rooted in real places, real bodies and the texture of ordinary lives.",
     name: 'Grounded',
     color: '#008844',
     zone: 'green',
@@ -1174,7 +1225,7 @@ export const moods: Mood[] = [
       { title: 'Short Term 12', director: 'Destin Daniel Cretton', year: 2013 },
       { title: 'Leave No Trace', director: 'Debra Granik', year: 2018 },
       { title: 'Wendy and Lucy', director: 'Kelly Reichardt', year: 2008 },
-      { title: 'Winters Bone', director: 'Debra Granik', year: 2010 },
+      { title: "Winter's Bone", director: 'Debra Granik', year: 2010 },
       { title: 'Beasts of the Southern Wild', director: 'Benh Zeitlin', year: 2012 },
       { title: 'Manchester by the Sea', director: 'Kenneth Lonergan', year: 2016 },
       { title: 'American Fiction', director: 'Cord Jefferson', year: 2023 },
@@ -1185,6 +1236,7 @@ export const moods: Mood[] = [
   // ==================== ROW 6 (y = 100) — CENTER-RIGHT zone ====================
   {
     id: 'haunting',
+    description: "Images and feelings that linger — films that refuse to leave you after you leave them.",
     name: 'Haunting',
     color: '#aa0066',
     zone: 'purple',
@@ -1196,7 +1248,7 @@ export const moods: Mood[] = [
       { title: 'The Orphanage', director: 'J.A. Bayona', year: 2007 },
       { title: 'Lake Mungo', director: 'Joel Anderson', year: 2008 },
       { title: 'A Ghost Story', director: 'David Lowery', year: 2017 },
-      { title: 'The Devils Backbone', director: 'Guillermo del Toro', year: 2001 },
+      { title: "The Devil's Backbone", director: 'Guillermo del Toro', year: 2001 },
       { title: 'Picnic at Hanging Rock', director: 'Peter Weir', year: 1975 },
       { title: 'Suspiria', director: 'Dario Argento', year: 1977 },
       { title: 'Annihilation', director: 'Alex Garland', year: 2018 },
@@ -1208,6 +1260,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'enchanting',
+    description: "Worlds made of wonder where magic feels entirely earned and real.",
     name: 'Enchanting',
     color: '#dd44aa',
     zone: 'pink',
@@ -1216,8 +1269,8 @@ export const moods: Mood[] = [
     movies: [
       { title: 'The Princess Bride', director: 'Rob Reiner', year: 1987 },
       { title: 'Stardust', director: 'Matthew Vaughn', year: 2007 },
-      { title: 'Howls Moving Castle', director: 'Hayao Miyazaki', year: 2004 },
-      { title: 'Pans Labyrinth', director: 'Guillermo del Toro', year: 2006 },
+      { title: "Howl's Moving Castle", director: 'Hayao Miyazaki', year: 2004 },
+      { title: 'Pan"s Labyrinth', director: 'Guillermo del Toro', year: 2006 },
       { title: 'Coraline', director: 'Henry Selick', year: 2009 },
       { title: 'Spirited Away', director: 'Hayao Miyazaki', year: 2001 },
       { title: 'The Shape of Water', director: 'Guillermo del Toro', year: 2017 },
@@ -1231,18 +1284,19 @@ export const moods: Mood[] = [
   },
   {
     id: 'magical',
+    description: "Films where the impossible is treated as perfectly natural.",
     name: 'Magical',
     color: '#cc66cc',
     zone: 'purple',
     position: { x: -500, y: 100 },
     size: 180,
     movies: [
-      { title: 'Pans Labyrinth', director: 'Guillermo del Toro', year: 2006 },
+      { title: "Pan's Labyrinth", director: 'Guillermo del Toro', year: 2006 },
       { title: 'The Shape of Water', director: 'Guillermo del Toro', year: 2017 },
-      { title: 'Howls Moving Castle', director: 'Hayao Miyazaki', year: 2004 },
+      { title: "Howl's Moving Castle", director: 'Hayao Miyazaki', year: 2004 },
       { title: 'Spirited Away', director: 'Hayao Miyazaki', year: 2001 },
-      { title: 'Harry Potter and the Philosophers Stone', director: 'Chris Columbus', year: 2001 },
-      { title: 'Kikis Delivery Service', director: 'Hayao Miyazaki', year: 1989 },
+      { title: "Harry Potter and the Philosopher's Stone", director: 'Chris Columbus', year: 2001 },
+      { title: 'Kiki"s Delivery Service', director: 'Hayao Miyazaki', year: 1989 },
       { title: 'Kubo and the Two Strings', director: 'Travis Knight', year: 2016 },
       { title: 'The Secret Garden', director: 'Agnieszka Holland', year: 1993 },
       { title: 'Practical Magic', director: 'Griffin Dunne', year: 1998 },
@@ -1254,13 +1308,14 @@ export const moods: Mood[] = [
   },
   {
     id: 'fantastical',
+    description: "Grand invented worlds built with enough detail to feel genuinely discovered.",
     name: 'Fantastical',
     color: '#aa88dd',
     zone: 'purple',
     position: { x: -300, y: 100 },
     size: 180,
     movies: [
-      { title: 'Pans Labyrinth', director: 'Guillermo del Toro', year: 2006 },
+      { title: "Pan's Labyrinth", director: 'Guillermo del Toro', year: 2006 },
       { title: 'The Wizard of Oz', director: 'Victor Fleming', year: 1939 },
       { title: 'Labyrinth', director: 'Jim Henson', year: 1986 },
       { title: 'The NeverEnding Story', director: 'Wolfgang Petersen', year: 1984 },
@@ -1277,6 +1332,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'serene',
+    description: "Complete stillness — films content to simply exist without urgency.",
     name: 'Serene',
     color: '#66ccbb',
     zone: 'teal',
@@ -1287,7 +1343,7 @@ export const moods: Mood[] = [
       { title: 'Ponyo', director: 'Hayao Miyazaki', year: 2008 },
       { title: 'A Ghost Story', director: 'David Lowery', year: 2017 },
       { title: 'The Straight Story', director: 'David Lynch', year: 1999 },
-      { title: 'Babettes Feast', director: 'Gabriel Axel', year: 1987 },
+      { title: "Babette's Feast", director: 'Gabriel Axel', year: 1987 },
       { title: 'My Dinner with Andre', director: 'Louis Malle', year: 1981 },
       { title: 'Lost in Translation', director: 'Sofia Coppola', year: 2003 },
       { title: 'Spring, Summer, Fall, Winter... and Spring', director: 'Kim Ki-duk', year: 2003 },
@@ -1300,6 +1356,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'tranquil',
+    description: "A meditative rhythm that asks nothing of you except quiet attention.",
     name: 'Tranquil',
     color: '#44bbcc',
     zone: 'teal',
@@ -1323,6 +1380,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'soothing',
+    description: "Films that ease something in you — warm, gentle and unhurried.",
     name: 'Soothing',
     color: '#22aadd',
     zone: 'blue',
@@ -1331,7 +1389,7 @@ export const moods: Mood[] = [
     movies: [
       { title: 'The Secret Garden', director: 'Agnieszka Holland', year: 1993 },
       { title: 'Whisper of the Heart', director: 'Yoshifumi Kondō', year: 1995 },
-      { title: 'Kikis Delivery Service', director: 'Hayao Miyazaki', year: 1989 },
+      { title: "Kiki's Delivery Service", director: 'Hayao Miyazaki', year: 1989 },
       { title: 'Ponyo', director: 'Hayao Miyazaki', year: 2008 },
       { title: 'My Neighbor Totoro', director: 'Hayao Miyazaki', year: 1988 },
       { title: 'About Time', director: 'Richard Curtis', year: 2013 },
@@ -1346,6 +1404,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'refreshing',
+    description: "Young, honest and full of life — cinema that feels like a window opened.",
     name: 'Refreshing',
     color: '#00aacc',
     zone: 'teal',
@@ -1369,6 +1428,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'earnest',
+    description: "Films that mean every word — sincere, purposeful and unafraid to care.",
     name: 'Earnest',
     color: '#0099bb',
     zone: 'blue',
@@ -1377,7 +1437,7 @@ export const moods: Mood[] = [
     movies: [
       { title: 'Spotlight', director: 'Tom McCarthy', year: 2015 },
       { title: 'The Post', director: 'Steven Spielberg', year: 2017 },
-      { title: 'All the Presidents Men', director: 'Alan J. Pakula', year: 1976 },
+      { title: "All the President's Men", director: 'Alan J. Pakula', year: 1976 },
       { title: 'The Insider', director: 'Michael Mann', year: 1999 },
       { title: 'Good Night, and Good Luck', director: 'George Clooney', year: 2005 },
       { title: 'First Man', director: 'Damien Chazelle', year: 2018 },
@@ -1392,6 +1452,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'courageous',
+    description: "Moral clarity in impossible circumstances — doing the right thing at great cost.",
     name: 'Courageous',
     color: '#0088aa',
     zone: 'blue',
@@ -1400,7 +1461,7 @@ export const moods: Mood[] = [
     movies: [
       { title: 'Braveheart', director: 'Mel Gibson', year: 1995 },
       { title: '12 Years a Slave', director: 'Steve McQueen', year: 2013 },
-      { title: 'Schindlers List', director: 'Steven Spielberg', year: 1993 },
+      { title: "Schindler's List", director: 'Steven Spielberg', year: 1993 },
       { title: 'The Revenant', director: 'Alejandro Iñárritu', year: 2015 },
       { title: 'Gandhi', director: 'Richard Attenborough', year: 1982 },
       { title: 'Unbroken', director: 'Angelina Jolie', year: 2014 },
@@ -1417,6 +1478,7 @@ export const moods: Mood[] = [
   // ==================== ROW 7 (y = 300) — BLUE-TEAL zone ====================
   {
     id: 'eerie',
+    description: "Something slightly off in the fabric of reality — dread without a clear source.",
     name: 'Eerie',
     color: '#880088',
     zone: 'purple',
@@ -1440,6 +1502,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'surreal',
+    description: "Dream logic taken seriously — the subconscious rendered as landscape.",
     name: 'Surreal',
     color: '#9966cc',
     zone: 'purple',
@@ -1454,7 +1517,7 @@ export const moods: Mood[] = [
       { title: 'Holy Motors', director: 'Leos Carax', year: 2012 },
       { title: 'The Lobster', director: 'Yorgos Lanthimos', year: 2015 },
       { title: 'Synecdoche, New York', director: 'Charlie Kaufman', year: 2008 },
-      { title: 'Im Thinking of Ending Things', director: 'Charlie Kaufman', year: 2020 },
+      { title: "I'm Thinking of Ending Things", director: 'Charlie Kaufman', year: 2020 },
       { title: 'Annihilation', director: 'Alex Garland', year: 2018 },
       { title: 'Enter the Void', director: 'Gaspar Noé', year: 2009 },
       { title: 'Beau Is Afraid', director: 'Ari Aster', year: 2023 },
@@ -1463,6 +1526,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'eccentric',
+    description: "Films that follow their own strange rules and are entirely at peace with that.",
     name: 'Eccentric',
     color: '#bb88cc',
     zone: 'purple',
@@ -1486,6 +1550,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'quirky',
+    description: "Oddly specific characters navigating life with their own peculiar grace.",
     name: 'Quirky',
     color: '#ddaacc',
     zone: 'pink',
@@ -1509,6 +1574,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'blissful',
+    description: "The rare, complete happiness of being exactly where you want to be.",
     name: 'Blissful',
     color: '#88ccdd',
     zone: 'blue',
@@ -1532,6 +1598,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'mellow',
+    description: "Low-key, unhurried films that don't raise their voice but say everything.",
     name: 'Mellow',
     color: '#66bbdd',
     zone: 'blue',
@@ -1555,6 +1622,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'meditative',
+    description: "Cinema as a practice of attention — slow, patient and philosophically serious.",
     name: 'Meditative',
     color: '#4499cc',
     zone: 'blue',
@@ -1578,6 +1646,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'contemplative',
+    description: "Films that sit with big questions without rushing toward answers.",
     name: 'Contemplative',
     color: '#2277bb',
     zone: 'blue',
@@ -1594,13 +1663,14 @@ export const moods: Mood[] = [
       { title: 'Certified Copy', director: 'Abbas Kiarostami', year: 2010 },
       { title: 'Oslo, August 31st', director: 'Joachim Trier', year: 2011 },
       { title: 'Winter Light', director: 'Ingmar Bergman', year: 1963 },
-      { title: 'LAvventura', director: 'Michelangelo Antonioni', year: 1960 },
+      { title: "L'Avventura", director: 'Michelangelo Antonioni', year: 1960 },
       { title: 'Aftersun', director: 'Charlotte Wells', year: 2022 },
       { title: 'Past Lives', director: 'Celine Song', year: 2023 },
     ]
   },
   {
     id: 'introspective',
+    description: "Turning inward — the examined life, the examined self.",
     name: 'Introspective',
     color: '#1166aa',
     zone: 'blue',
@@ -1624,6 +1694,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'sincere',
+    description: "Films without armour — honest, direct and entirely uninterested in being cool.",
     name: 'Sincere',
     color: '#005599',
     zone: 'blue',
@@ -1649,6 +1720,7 @@ export const moods: Mood[] = [
   // ==================== ROW 8 (y = 500) — BLUE-PURPLE zone ====================
   {
     id: 'ominous',
+    description: "Something terrible is coming — and the film makes you feel every moment of the approach.",
     name: 'Ominous',
     color: '#660077',
     zone: 'purple',
@@ -1672,6 +1744,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'hypnotic',
+    description: "Films that pull you under — rhythm, image and sound creating an altered state.",
     name: 'Hypnotic',
     color: '#7755aa',
     zone: 'purple',
@@ -1695,6 +1768,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'ethereal',
+    description: "Transcendent and barely-there — beauty so delicate it seems to exist between breaths.",
     name: 'Ethereal',
     color: '#9977cc',
     zone: 'purple',
@@ -1718,6 +1792,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'dreamy',
+    description: "Hazy, sensory and soft at the edges — the cinema of half-remembered things.",
     name: 'Dreamy',
     color: '#aabbdd',
     zone: 'blue',
@@ -1741,6 +1816,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'still',
+    description: "Restraint as a style — films that communicate through what they don't say.",
     name: 'Still',
     color: '#8899cc',
     zone: 'blue',
@@ -1764,6 +1840,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'melancholic-2',
+    description: "The particular sadness of things you can't go back to — longing without bitterness.",
     name: 'Wistful',
     color: '#6688bb',
     zone: 'blue',
@@ -1787,6 +1864,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'mysterious',
+    description: "Questions without answers, doors without keys — ambiguity as the whole point.",
     name: 'Mysterious',
     color: '#4466aa',
     zone: 'blue',
@@ -1803,13 +1881,14 @@ export const moods: Mood[] = [
       { title: 'Primer', director: 'Shane Carruth', year: 2004 },
       { title: 'The Double', director: 'Richard Ayoade', year: 2013 },
       { title: 'Donnie Darko', director: 'Richard Kelly', year: 2001 },
-      { title: 'Im Thinking of Ending Things', director: 'Charlie Kaufman', year: 2020 },
+      { title: "I'm Thinking of Ending Things", director: 'Charlie Kaufman', year: 2020 },
       { title: 'Saltburn', director: 'Emerald Fennell', year: 2023 },
       { title: 'The Substance', director: 'Coralie Fargeat', year: 2024 },
     ]
   },
   {
     id: 'empathetic',
+    description: "Films that ask you to fully inhabit another life — and make it completely possible.",
     name: 'Empathetic',
     color: '#2255aa',
     zone: 'blue',
@@ -1833,6 +1912,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'resilient',
+    description: "The human capacity to endure — not heroically, but stubbornly, quietly, for real.",
     name: 'Resilient',
     color: '#1144aa',
     zone: 'blue',
@@ -1856,6 +1936,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'abstract',
+    description: "Cinema that abandons narrative for pure experience — feeling over meaning.",
     name: 'Abstract',
     color: '#003399',
     zone: 'blue',
@@ -1881,6 +1962,7 @@ export const moods: Mood[] = [
   // ==================== ROW 9 (y = 700) — PURPLE zone ====================
   {
     id: 'chilling',
+    description: "Cold, precise evil — the kind that makes you check the locks twice.",
     name: 'Chilling',
     color: '#550066',
     zone: 'purple',
@@ -1904,6 +1986,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'uncanny',
+    description: "Familiar things made deeply strange — the world slightly wrong in ways you can't name.",
     name: 'Uncanny',
     color: '#6644aa',
     zone: 'purple',
@@ -1917,7 +2000,7 @@ export const moods: Mood[] = [
       { title: 'Under the Skin', director: 'Jonathan Glazer', year: 2013 },
       { title: 'Dogtooth', director: 'Yorgos Lanthimos', year: 2009 },
       { title: 'Annihilation', director: 'Alex Garland', year: 2018 },
-      { title: 'Im Thinking of Ending Things', director: 'Charlie Kaufman', year: 2020 },
+      { title: "I'm Thinking of Ending Things", director: 'Charlie Kaufman', year: 2020 },
       { title: 'The Killing of a Sacred Deer', director: 'Yorgos Lanthimos', year: 2017 },
       { title: 'Enemy', director: 'Denis Villeneuve', year: 2013 },
       { title: 'Possessor', director: 'Brandon Cronenberg', year: 2020 },
@@ -1927,6 +2010,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'cryptic',
+    description: "Films built like puzzles where every viewing reveals something new.",
     name: 'Cryptic',
     color: '#7755bb',
     zone: 'purple',
@@ -1950,6 +2034,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'puzzling',
+    description: "Narratives that fold back on themselves — the pleasure of not knowing who to trust.",
     name: 'Puzzling',
     color: '#8866cc',
     zone: 'purple',
@@ -1973,6 +2058,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'enigmatic',
+    description: "Deliberately opaque films that reward surrender over comprehension.",
     name: 'Enigmatic',
     color: '#9977cc',
     zone: 'purple',
@@ -1987,7 +2073,7 @@ export const moods: Mood[] = [
       { title: 'Lost Highway', director: 'David Lynch', year: 1997 },
       { title: 'The Killing of a Sacred Deer', director: 'Yorgos Lanthimos', year: 2017 },
       { title: 'Caché', director: 'Michael Haneke', year: 2005 },
-      { title: 'L Avventura', director: 'Michelangelo Antonioni', year: 1960 },
+      { title: "L'Avventura", director: 'Michelangelo Antonioni', year: 1960 },
       { title: 'The Witch', director: 'Robert Eggers', year: 2015 },
       { title: 'Under the Skin', director: 'Jonathan Glazer', year: 2013 },
       { title: 'I Saw the TV Glow', director: 'Jane Schoenbrun', year: 2024 },
@@ -1996,6 +2082,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'melancholic-3',
+    description: "Grief as a landscape — films where sadness has weight, texture and beauty.",
     name: 'Melancholic',
     color: '#7788bb',
     zone: 'blue',
@@ -2019,6 +2106,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'vintage',
+    description: "The particular glamour of another era — old Hollywood, old Europe, old ways of seeing.",
     name: 'Vintage',
     color: '#5566aa',
     zone: 'blue',
@@ -2028,9 +2116,9 @@ export const moods: Mood[] = [
       { title: 'Cinema Paradiso', director: 'Giuseppe Tornatore', year: 1988 },
       { title: 'Roman Holiday', director: 'William Wyler', year: 1953 },
       { title: 'Casablanca', director: 'Michael Curtiz', year: 1942 },
-      { title: 'Breakfast at Tiffanys', director: 'Blake Edwards', year: 1961 },
+      { title: "Breakfast at Tiffany's", director: 'Blake Edwards', year: 1961 },
       { title: 'Sunset Boulevard', director: 'Billy Wilder', year: 1950 },
-      { title: 'Singin in the Rain', director: 'Stanley Donen & Gene Kelly', year: 1952 },
+      { title: "Singin' in the Rain", director: 'Stanley Donen & Gene Kelly', year: 1952 },
       { title: 'Rear Window', director: 'Alfred Hitchcock', year: 1954 },
       { title: 'Vertigo', director: 'Alfred Hitchcock', year: 1958 },
       { title: 'Some Like It Hot', director: 'Billy Wilder', year: 1959 },
@@ -2042,6 +2130,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'retro',
+    description: "Nostalgia for a specific decade — the music, the clothes, the feeling of that particular time.",
     name: 'Retro',
     color: '#3355aa',
     zone: 'blue',
@@ -2052,7 +2141,7 @@ export const moods: Mood[] = [
       { title: 'American Graffiti', director: 'George Lucas', year: 1973 },
       { title: 'Almost Famous', director: 'Cameron Crowe', year: 2000 },
       { title: 'Boogie Nights', director: 'Paul Thomas Anderson', year: 1997 },
-      { title: 'That 70s Show equivalent — Anchorman', director: 'Adam McKay', year: 2004 },
+      { title: "That '70s Show equivalent — Anchorman", director: 'Adam McKay', year: 2004 },
       { title: 'The Wedding Singer', director: 'Frank Coraci', year: 1998 },
       { title: 'Dirty Dancing', director: 'Emile Ardolino', year: 1987 },
       { title: 'Grease', director: 'Randal Kleiser', year: 1978 },
@@ -2065,6 +2154,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'groovy',
+    description: "Music, movement and the cultural electricity of eras defined by their sound.",
     name: 'Groovy',
     color: '#2244aa',
     zone: 'blue',
@@ -2088,6 +2178,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'epic',
+    description: "Films of enormous scale that match their ambition — worlds, histories, destinies.",
     name: 'Epic',
     color: '#113399',
     zone: 'blue',
@@ -2099,7 +2190,7 @@ export const moods: Mood[] = [
       { title: 'Dune', director: 'Denis Villeneuve', year: 2021 },
       { title: 'Apocalypse Now', director: 'Francis Ford Coppola', year: 1979 },
       { title: 'Gladiator', director: 'Ridley Scott', year: 2000 },
-      { title: 'Schindlers List', director: 'Steven Spielberg', year: 1993 },
+      { title: "Schindler's List", director: 'Steven Spielberg', year: 1993 },
       { title: 'Interstellar', director: 'Christopher Nolan', year: 2014 },
       { title: 'The Revenant', director: 'Alejandro Iñárritu', year: 2015 },
       { title: 'Ben-Hur', director: 'William Wyler', year: 1959 },
@@ -2113,6 +2204,7 @@ export const moods: Mood[] = [
   // ==================== ROW 10 (y = 900) — DEEP PURPLE zone ====================
   {
     id: 'disturbing-2',
+    description: "Films that cross lines deliberately — confrontational, extreme and impossible to unsee.",
     name: 'Disturbing',
     color: '#440055',
     zone: 'purple',
@@ -2136,6 +2228,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'sinister-2',
+    description: "Evil with patience — a slow-building wrongness that reveals itself when it's too late.",
     name: 'Sinister',
     color: '#553366',
     zone: 'purple',
@@ -2146,7 +2239,7 @@ export const moods: Mood[] = [
       { title: 'The Shining', director: 'Stanley Kubrick', year: 1980 },
       { title: 'Zodiac', director: 'David Fincher', year: 2007 },
       { title: 'Seven', director: 'David Fincher', year: 1995 },
-      { title: 'Rosemarys Baby', director: 'Roman Polanski', year: 1968 },
+      { title: "Rosemary's Baby", director: 'Roman Polanski', year: 1968 },
       { title: 'The Wicker Man', director: 'Robin Hardy', year: 1973 },
       { title: 'The Silence of the Lambs', director: 'Jonathan Demme', year: 1991 },
       { title: 'American Psycho', director: 'Mary Harron', year: 2000 },
@@ -2159,6 +2252,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'dark',
+    description: "Films that go to the very darkest places — harrowing, unflinching and without comfort.",
     name: 'Dark',
     color: '#664477',
     zone: 'purple',
@@ -2182,6 +2276,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'gloomy',
+    description: "The weight of the world made cinematic — heavy skies, heavy hearts.",
     name: 'Gloomy',
     color: '#775588',
     zone: 'purple',
@@ -2205,6 +2300,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'haunted',
+    description: "Lives and places shaped by what happened there — the past as an active presence.",
     name: 'Haunted',
     color: '#886699',
     zone: 'purple',
@@ -2214,7 +2310,7 @@ export const moods: Mood[] = [
       { title: 'The Others', director: 'Alejandro Amenábar', year: 2001 },
       { title: 'The Orphanage', director: 'J.A. Bayona', year: 2007 },
       { title: 'A Tale of Two Sisters', director: 'Kim Jee-woon', year: 2003 },
-      { title: 'The Devils Backbone', director: 'Guillermo del Toro', year: 2001 },
+      { title: "The Devil's Backbone", director: 'Guillermo del Toro', year: 2001 },
       { title: 'Lake Mungo', director: 'Joel Anderson', year: 2008 },
       { title: 'The Sixth Sense', director: 'M. Night Shyamalan', year: 1999 },
       { title: 'Picnic at Hanging Rock', director: 'Peter Weir', year: 1975 },
@@ -2228,6 +2324,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'somber',
+    description: "Dignified sadness — films that treat suffering with gravity and without exploitation.",
     name: 'Somber',
     color: '#7777aa',
     zone: 'blue',
@@ -2235,7 +2332,7 @@ export const moods: Mood[] = [
     size: 180,
     movies: [
       { title: 'Requiem for a Dream', director: 'Darren Aronofsky', year: 2000 },
-      { title: 'Schindlers List', director: 'Steven Spielberg', year: 1993 },
+      { title: "Schindler's List", director: 'Steven Spielberg', year: 1993 },
       { title: '12 Years a Slave', director: 'Steve McQueen', year: 2013 },
       { title: 'Precious', director: 'Lee Daniels', year: 2009 },
       { title: 'The Pianist', director: 'Roman Polanski', year: 2002 },
@@ -2251,6 +2348,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'pensive',
+    description: "The contemplative mood — sitting with thoughts, not rushing anywhere.",
     name: 'Pensive',
     color: '#6688bb',
     zone: 'blue',
@@ -2266,7 +2364,7 @@ export const moods: Mood[] = [
       { title: 'Wild Strawberries', director: 'Ingmar Bergman', year: 1957 },
       { title: 'Nomadland', director: 'Chloé Zhao', year: 2020 },
       { title: 'Oslo, August 31st', director: 'Joachim Trier', year: 2011 },
-      { title: 'L Avventura', director: 'Michelangelo Antonioni', year: 1960 },
+      { title: "L'Avventura", director: 'Michelangelo Antonioni', year: 1960 },
       { title: 'Aftersun', director: 'Charlotte Wells', year: 2022 },
       { title: 'Past Lives', director: 'Celine Song', year: 2023 },
       { title: 'A Real Pain', director: 'Jesse Eisenberg', year: 2024 },
@@ -2274,6 +2372,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'wistful-2',
+    description: "The particular ache of wanting something you can picture but never reach.",
     name: 'Longing',
     color: '#5577bb',
     zone: 'blue',
@@ -2297,6 +2396,7 @@ export const moods: Mood[] = [
   },
   {
     id: 'restful',
+    description: "Films you return to when you need to feel safe — gentle, warm and entirely undemanding.",
     name: 'Restful',
     color: '#4466aa',
     zone: 'blue',
@@ -2304,7 +2404,7 @@ export const moods: Mood[] = [
     size: 180,
     movies: [
       { title: 'The Secret Garden', director: 'Agnieszka Holland', year: 1993 },
-      { title: 'Kikis Delivery Service', director: 'Hayao Miyazaki', year: 1989 },
+      { title: "Kiki's Delivery Service", director: 'Hayao Miyazaki', year: 1989 },
       { title: 'The Wind Rises', director: 'Hayao Miyazaki', year: 2013 },
       { title: 'From Up on Poppy Hill', director: 'Gorō Miyazaki', year: 2011 },
       { title: 'My Neighbor Totoro', director: 'Hayao Miyazaki', year: 1988 },
@@ -2313,13 +2413,14 @@ export const moods: Mood[] = [
       { title: 'Paterson', director: 'Jim Jarmusch', year: 2016 },
       { title: 'Nomadland', director: 'Chloé Zhao', year: 2020 },
       { title: 'A River Runs Through It', director: 'Robert Redford', year: 1992 },
-      { title: 'Babettes Feast', director: 'Gabriel Axel', year: 1987 },
+      { title: "Babette's Feast", director: 'Gabriel Axel', year: 1987 },
       { title: 'The Boy and the Heron', director: 'Hayao Miyazaki', year: 2023 },
       { title: 'Robot Dreams', director: 'Pablo Berger', year: 2023 },
     ]
   },
   {
     id: 'gentle',
+    description: "Softness as strength — films that move you precisely because they never raise their voice.",
     name: 'Gentle',
     color: '#335599',
     zone: 'blue',

@@ -1,9 +1,11 @@
 // @ts-ignore
 const API_KEY = import.meta.env?.VITE_TMDB_API_KEY;
+console.log('[TMDB] API key loaded:', API_KEY ? `${API_KEY.slice(0, 6)}...` : 'MISSING ❌');
 const BASE_URL = 'https://api.themoviedb.org/3';
 export const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
 export interface TMDBMovie {
+  id: number;
   poster_path: string | null;
   overview: string;
   release_date: string;
@@ -12,6 +14,21 @@ export interface TMDBMovie {
 }
 
 const cache: Record<string, TMDBMovie | null> = {};
+
+export async function fetchTrailerKey(tmdbId: number): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${BASE_URL}/movie/${tmdbId}/videos?api_key=${API_KEY}&language=en-US`
+    );
+    const data = await res.json();
+    const trailer = data.results?.find(
+      (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+    ) ?? data.results?.[0];
+    return trailer?.key ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchMovieDetails(title: string, year: number): Promise<TMDBMovie | null> {
   const key = `${title}-${year}`;
