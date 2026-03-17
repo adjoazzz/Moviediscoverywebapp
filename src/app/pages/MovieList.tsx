@@ -1,9 +1,10 @@
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
-import { moods } from '../data/moods';
+import { moods } from '../../data/moods';
 import { useEffect, useState } from 'react';
-import { fetchMovieDetails, fetchTrailerKey, IMG_BASE, type TMDBMovie } from '../../services/tmdb';
+import { fetchMovieDetails, fetchTrailerKey, fetchTVDetails, fetchTVTrailerKey, fetchBookDetails, IMG_BASE, type TMDBMovie, type BookDetails } from '../../services/tmdb';
+type ContentType = 'movies' | 'drama' | 'anime' | 'books';
 import { getMoodColorFromPosition } from '../../utils/moodColor';
 
 interface EnrichedMovie {
@@ -16,6 +17,8 @@ interface EnrichedMovie {
 export default function MovieList() {
   const { moodId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const contentType: ContentType = (location.state as any)?.contentType ?? 'movies';
   const [isLoading, setIsLoading] = useState(true);
   const [movies, setMovies] = useState<EnrichedMovie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null);
@@ -34,7 +37,10 @@ export default function MovieList() {
     setTrailerKey(null);
     setShowTrailer(false);
     setTrailerLoading(true);
-    fetchTrailerKey(selectedMovie.tmdb.id).then(key => {
+    const fetchFn = (contentType === 'drama' || contentType === 'anime')
+      ? fetchTVTrailerKey
+      : fetchTrailerKey;
+    fetchFn(selectedMovie.tmdb.id).then(key => {
       setTrailerKey(key);
       setTrailerLoading(false);
     });
@@ -46,8 +52,15 @@ export default function MovieList() {
     async function loadMovies() {
       setIsLoading(true);
       const enriched = await Promise.all(
-        mood!.movies.map(async (movie) => {
-          const tmdb = await fetchMovieDetails(movie.title, movie.year);
+        mood!.movies.map(async (movie: any) => {
+          let tmdb = null;
+          if (contentType === 'movies') {
+            tmdb = await fetchMovieDetails(movie.title, movie.year);
+          } else if (contentType === 'drama' || contentType === 'anime') {
+            tmdb = await fetchTVDetails(movie.title, movie.year);
+          } else if (contentType === 'books') {
+            tmdb = await fetchBookDetails(movie.title, movie.author);
+          }
           return { ...movie, tmdb };
         })
       );
@@ -126,6 +139,28 @@ export default function MovieList() {
           >
             {mood.description}
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{ marginTop: 12, display: 'flex', gap: 8 }}
+          >
+            {(['movies', 'drama', 'anime', 'books'] as ContentType[]).map(type => (
+              <span
+                key={type}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 20,
+                  fontSize: 12,
+                  background: contentType === type ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                  color: contentType === type ? 'white' : 'rgba(255,255,255,0.3)',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {type === 'movies' ? '🎬' : type === 'drama' ? '📺' : type === 'anime' ? '🎌' : '📚'} {type}
+              </span>
+            ))}
+          </motion.div>
         </div>
       </motion.section>
 
@@ -196,7 +231,7 @@ export default function MovieList() {
                       {movie.title}
                     </h3>
                     <p className="text-white/40 text-xs md:text-sm tracking-wide">
-                      {movie.director}
+                      {(movie as any).author || (movie as any).director || (movie as any).studio}
                     </p>
                     <p className="text-white/30 text-xs leading-relaxed line-clamp-2">
                       {movie.tmdb?.overview || 'No description available.'}
@@ -281,7 +316,7 @@ export default function MovieList() {
                 {selectedMovie.title}
               </h2>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 16 }}>
-                {selectedMovie.director} · {selectedMovie.year}
+                {(selectedMovie as any).author || (selectedMovie as any).director || (selectedMovie as any).studio} · {selectedMovie.year}
               </p>
 
               {/* Description */}

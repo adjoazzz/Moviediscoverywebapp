@@ -1,6 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { moods } from '../data/moods';
+import { moods, type Mood } from '../../data/moods';
+import { dramas } from '../../data/dramas';
+import { animes } from '../../data/anime';
+import { books } from '../../data/books';
+
+export type ContentType = 'movies' | 'drama' | 'anime' | 'books';
+export type DramaFilter = 'all' | 'kdrama' | 'cdrama' | 'jdrama';
 
 const morphShapes = [
   { hover: "50% 20% 50% 20% / 20% 50% 20% 50%", rotate: "15deg" },
@@ -96,6 +102,8 @@ export default function Home() {
   const [cellSize, setCellSize] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<ContentType>('movies');
+  const [dramaFilter, setDramaFilter] = useState<DramaFilter>('all');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -282,7 +290,7 @@ export default function Home() {
     isDragging.current = false;
     // If it was a tap (not a drag), navigate to active mood
     if (!didDrag.current && activeId) {
-      navigate(`/mood/${activeId}`);
+      navigate(`/mood/${activeId}`, { state: { contentType } });
     }
     // Don't reset activeId — keep last circle active until finger moves to a new one
   }
@@ -291,7 +299,7 @@ export default function Home() {
     if (didDrag.current) return;
     // Desktop click: tap once to activate, tap again to navigate
     if (activeId === moodId) {
-      navigate(`/mood/${moodId}`);
+      navigate(`/mood/${moodId}`, { state: { contentType } });
     } else {
       setActiveId(moodId);
     }
@@ -303,14 +311,20 @@ export default function Home() {
     ? getMoodColor(activeMoodPos.col, activeMoodPos.row)
     : 'white';
 
+  // Pick the right dataset based on content type
+  const activeData = contentType === 'movies' ? moods
+    : contentType === 'drama' ? dramas
+    : contentType === 'anime' ? animes
+    : books;
+
   const query = searchQuery.trim().toLowerCase();
   const moodResults = query
-    ? moods.filter(m => m.name.toLowerCase().includes(query))
+    ? activeData.filter((m: Mood) => m.name.toLowerCase().includes(query))
     : [];
 
   const movieResults: { movie: { title: string; director: string; year: number }; mood: typeof moods[0] }[] = [];
   if (query.length >= 2) {
-    for (const mood of moods) {
+    for (const mood of activeData as Mood[]) {
       for (const movie of mood.movies) {
         if (movie.title.toLowerCase().includes(query)) {
           movieResults.push({ movie, mood });
@@ -332,6 +346,69 @@ export default function Home() {
         <h1 className="text-white text-2xl tracking-tight font-light">
           mood<span className="text-white/30">/</span>film
         </h1>
+
+        {/* Content type toggle */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'rgba(255,255,255,0.07)',
+          borderRadius: 30,
+          padding: '4px',
+          gap: 2,
+        }}>
+          {(['movies', 'drama', 'anime', 'books'] as ContentType[]).map(type => (
+            <button
+              key={type}
+              onClick={() => { setContentType(type); setDramaFilter('all'); }}
+              style={{
+                padding: '5px 12px',
+                borderRadius: 24,
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: contentType === type ? 600 : 400,
+                background: contentType === type ? 'rgba(255,255,255,0.15)' : 'transparent',
+                color: contentType === type ? 'white' : 'rgba(255,255,255,0.45)',
+                transition: 'all 0.2s ease',
+                textTransform: 'capitalize',
+              }}
+            >
+              {type === 'movies' ? '🎬' : type === 'drama' ? '📺' : type === 'anime' ? '🎌' : '📚'} {type}
+            </button>
+          ))}
+        </div>
+
+        {/* Drama sub-filter */}
+        {contentType === 'drama' && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: 'rgba(255,255,255,0.07)',
+            borderRadius: 30,
+            padding: '4px',
+            gap: 2,
+          }}>
+            {(['all', 'kdrama', 'cdrama', 'jdrama'] as DramaFilter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setDramaFilter(f)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 24,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  fontWeight: dramaFilter === f ? 600 : 400,
+                  background: dramaFilter === f ? 'rgba(255,255,255,0.15)' : 'transparent',
+                  color: dramaFilter === f ? 'white' : 'rgba(255,255,255,0.45)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {f === 'all' ? 'All' : f === 'kdrama' ? 'K-Drama' : f === 'cdrama' ? 'C-Drama' : 'J-Drama'}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Search area */}
         <div className="flex items-center gap-3 relative">
@@ -418,13 +495,13 @@ export default function Home() {
                   <div style={{ padding: '8px 14px 4px', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     Moods
                   </div>
-                  {moodResults.slice(0, 4).map(mood => {
+                  {moodResults.slice(0, 4).map((mood: Mood) => {
                     const { col, row } = getGridPos(mood, cellSize);
                     const color = getMoodColor(col, row);
                     return (
                       <button
                         key={mood.id}
-                        onClick={() => { navigate(`/mood/${mood.id}`); setSearchQuery(''); setSearchOpen(false); }}
+                        onClick={() => { navigate(`/mood/${mood.id}`, { state: { contentType } }); setSearchQuery(''); setSearchOpen(false); }}
                         style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                       >
                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}/>
@@ -447,7 +524,7 @@ export default function Home() {
                     return (
                       <button
                         key={i}
-                        onClick={() => { navigate(`/mood/${mood.id}`); setSearchQuery(''); setSearchOpen(false); }}
+                        onClick={() => { navigate(`/mood/${mood.id}`, { state: { contentType } }); setSearchQuery(''); setSearchOpen(false); }}
                         style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'left' }}
                       >
                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}/>
@@ -507,7 +584,7 @@ export default function Home() {
             transform: `translate(${position.x}px, ${position.y}px)`,
           }}
         >
-          {moods.map((mood, index) => {
+          {activeData.map((mood: Mood, index: number) => {
             const { x, y, col, row } = getGridPos(mood, cellSize);
             const color = getMoodColor(col, row);
             const shape = morphShapes[index % morphShapes.length];
@@ -641,7 +718,7 @@ export default function Home() {
             </p>
           </div>
           <button
-            onClick={() => activeMood && navigate(`/mood/${activeMood.id}`)}
+            onClick={() => activeMood && navigate(`/mood/${activeMood.id}`, { state: { contentType } })}
             style={{
               width: 50,
               height: 50,

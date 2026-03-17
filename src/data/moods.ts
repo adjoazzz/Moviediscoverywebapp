@@ -15,10 +15,6 @@ export interface Mood {
   movies: Movie[];
 }
 
-// Color is computed dynamically in Home.tsx based on grid position.
-// The color field here is a placeholder only.
-// Grid: 10 cols (x: -900 to 900), 10 rows (y: -900 to 900)
-// Center (0, 0) = Adventurous
 
 export const moods: Mood[] = [
 
