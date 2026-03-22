@@ -138,7 +138,11 @@ export async function fetchBookDetails(title: string, author: string): Promise<B
     const result: BookDetails = {
       id: item.id,
       title: info.title,
-      poster_path: (info.imageLinks?.extraLarge ?? info.imageLinks?.large ?? info.imageLinks?.medium ?? info.imageLinks?.thumbnail)?.replace('http:', 'https:') ?? null,
+      poster_path: (() => {
+        const raw = info.imageLinks?.extraLarge ?? info.imageLinks?.large ?? info.imageLinks?.medium ?? info.imageLinks?.thumbnail ?? null;
+        if (!raw) return null;
+        return raw.replace('http:', 'https:').replace('&edge=curl', '').replace('zoom=1', 'zoom=3');
+      })(),
       overview: info.description ?? '',
       release_date: info.publishedDate ?? '',
       vote_average: info.averageRating ?? 0,
