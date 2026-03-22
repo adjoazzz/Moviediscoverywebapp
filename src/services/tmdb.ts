@@ -128,8 +128,8 @@ export async function fetchBookDetails(title: string, author: string): Promise<B
   if (key in bookCache) return bookCache[key];
 
   try {
-    const query = encodeURIComponent(`intitle:${title}+inauthor:${author}`);
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`);
+    const query = encodeURIComponent(`intitle:${title} inauthor:${author}`);
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&printType=books&langRestrict=en`);
     const data = await res.json();
     const item = data.items?.[0];
     if (!item) { bookCache[key] = null; return null; }
@@ -138,7 +138,7 @@ export async function fetchBookDetails(title: string, author: string): Promise<B
     const result: BookDetails = {
       id: item.id,
       title: info.title,
-      poster_path: info.imageLinks?.thumbnail?.replace('http:', 'https:') ?? null,
+      poster_path: (info.imageLinks?.extraLarge ?? info.imageLinks?.large ?? info.imageLinks?.medium ?? info.imageLinks?.thumbnail)?.replace('http:', 'https:') ?? null,
       overview: info.description ?? '',
       release_date: info.publishedDate ?? '',
       vote_average: info.averageRating ?? 0,

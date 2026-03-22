@@ -1,10 +1,14 @@
-import { useParams, useNavigate, useLocation } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
-import { moods } from '../../data/moods';
+import { moods, type Mood } from '../../data/moods';
+import { dramas } from '../../data/dramas';
+import { animes } from '../../data/anime';
+import { books } from '../../data/books';
 import { useEffect, useState } from 'react';
 import { fetchMovieDetails, fetchTrailerKey, fetchTVDetails, fetchTVTrailerKey, fetchBookDetails, IMG_BASE, type TMDBMovie, type BookDetails } from '../../services/tmdb';
 type ContentType = 'movies' | 'drama' | 'anime' | 'books';
+type DramaFilter = 'all' | 'kdrama' | 'cdrama' | 'jdrama';
 import { getMoodColorFromPosition } from '../../utils/moodColor';
 
 interface EnrichedMovie {
@@ -17,8 +21,8 @@ interface EnrichedMovie {
 export default function MovieList() {
   const { moodId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const contentType: ContentType = (location.state as any)?.contentType ?? 'movies';
+  const [contentType, setContentType] = useState<ContentType>('movies');
+  const [dramaFilter, setDramaFilter] = useState<DramaFilter>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [movies, setMovies] = useState<EnrichedMovie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null);
@@ -26,7 +30,12 @@ export default function MovieList() {
   const [trailerLoading, setTrailerLoading] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
 
-  const mood = moods.find(m => m.id === moodId);
+  const activeData = contentType === 'movies' ? moods
+    : contentType === 'drama' ? dramas
+    : contentType === 'anime' ? animes
+    : books;
+
+  const mood = activeData.find((m: Mood) => m.id === moodId);
 
   useEffect(() => {
     if (!selectedMovie?.tmdb?.id) {
@@ -54,12 +63,12 @@ export default function MovieList() {
       const enriched = await Promise.all(
         mood!.movies.map(async (movie: any) => {
           let tmdb = null;
-          if (contentType === 'movies') {
-            tmdb = await fetchMovieDetails(movie.title, movie.year);
-          } else if (contentType === 'drama' || contentType === 'anime') {
+          if (contentType === 'drama' || contentType === 'anime') {
             tmdb = await fetchTVDetails(movie.title, movie.year);
           } else if (contentType === 'books') {
-            tmdb = await fetchBookDetails(movie.title, movie.author);
+            tmdb = await fetchBookDetails(movie.title, (movie as any).author ?? movie.director);
+          } else {
+            tmdb = await fetchMovieDetails(movie.title, movie.year);
           }
           return { ...movie, tmdb };
         })
@@ -139,27 +148,72 @@ export default function MovieList() {
           >
             {mood.description}
           </motion.p>
+          {/* Content type toggle */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            style={{ marginTop: 12, display: 'flex', gap: 8 }}
+            style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 8 }}
           >
-            {(['movies', 'drama', 'anime', 'books'] as ContentType[]).map(type => (
-              <span
-                key={type}
-                style={{
-                  padding: '4px 12px',
-                  borderRadius: 20,
-                  fontSize: 12,
-                  background: contentType === type ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                  color: contentType === type ? 'white' : 'rgba(255,255,255,0.3)',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {type === 'movies' ? '🎬' : type === 'drama' ? '📺' : type === 'anime' ? '🎌' : '📚'} {type}
-              </span>
-            ))}
+            <div style={{
+              display: 'flex',
+              background: 'rgba(255,255,255,0.07)',
+              borderRadius: 30,
+              padding: '4px',
+              gap: 2,
+            }}>
+              {(['movies', 'drama', 'anime', 'books'] as ContentType[]).map(type => (
+                <button
+                  key={type}
+                  onClick={() => { setContentType(type); setDramaFilter('all'); }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 24,
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    fontWeight: contentType === type ? 600 : 400,
+                    background: contentType === type ? 'rgba(255,255,255,0.15)' : 'transparent',
+                    color: contentType === type ? 'white' : 'rgba(255,255,255,0.4)',
+                    transition: 'all 0.2s ease',
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {type === 'movies' ? '🎬' : type === 'drama' ? '📺' : type === 'anime' ? '🎌' : '📚'} {type}
+                </button>
+              ))}
+            </div>
+
+            {/* Drama sub-filter */}
+            {contentType === 'drama' && (
+              <div style={{
+                display: 'flex',
+                background: 'rgba(255,255,255,0.07)',
+                borderRadius: 30,
+                padding: '4px',
+                gap: 2,
+              }}>
+                {(['all', 'kdrama', 'cdrama', 'jdrama'] as DramaFilter[]).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setDramaFilter(f)}
+                    style={{
+                      padding: '5px 10px',
+                      borderRadius: 24,
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 11,
+                      fontWeight: dramaFilter === f ? 600 : 400,
+                      background: dramaFilter === f ? 'rgba(255,255,255,0.15)' : 'transparent',
+                      color: dramaFilter === f ? 'white' : 'rgba(255,255,255,0.4)',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {f === 'all' ? 'All' : f === 'kdrama' ? 'K-Drama' : f === 'cdrama' ? 'C-Drama' : 'J-Drama'}
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       </motion.section>
@@ -202,7 +256,7 @@ export default function MovieList() {
                   >
                     {movie.tmdb?.poster_path ? (
                       <img
-                        src={`${IMG_BASE}${movie.tmdb.poster_path}`}
+                        src={contentType === 'books' ? movie.tmdb.poster_path : `${IMG_BASE}${movie.tmdb.poster_path}`}
                         alt={movie.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -291,7 +345,7 @@ export default function MovieList() {
             {selectedMovie.tmdb?.poster_path && (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 24px 0' }}>
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${selectedMovie.tmdb.poster_path}`}
+                  src={contentType === 'books' ? selectedMovie.tmdb.poster_path : `https://image.tmdb.org/t/p/w500${selectedMovie.tmdb.poster_path}`}
                   alt={selectedMovie.title}
                   style={{ width: '55%', borderRadius: 12, display: 'block' }}
                 />
