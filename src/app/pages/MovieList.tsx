@@ -259,6 +259,7 @@ export default function MovieList() {
                         src={contentType === 'books' ? movie.tmdb.poster_path : `${IMG_BASE}${movie.tmdb.poster_path}`}
                         alt={movie.title}
                         referrerPolicy="no-referrer"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
@@ -349,6 +350,7 @@ export default function MovieList() {
                   src={contentType === 'books' ? selectedMovie.tmdb.poster_path : `https://image.tmdb.org/t/p/w500${selectedMovie.tmdb.poster_path}`}
                   alt={selectedMovie.title}
                   referrerPolicy="no-referrer"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   style={{ width: '55%', borderRadius: 12, display: 'block' }}
                 />
               </div>

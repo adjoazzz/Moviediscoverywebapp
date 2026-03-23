@@ -15,28 +15,31 @@ const rowMap: Record<string, number> = {
 };
 
 export function getMoodColor(col: number, row: number): string {
-  const isTop = row < ROWS / 2;
-  const tx = col / (COLS - 1);
-  const ty = isTop
-    ? (row / (ROWS / 2 - 1))
-    : ((row - ROWS / 2) / (ROWS / 2 - 1));
+  // 4 clear quadrants — no blending between them
+  // Top-left: RED | Top-right: YELLOW
+  // Bottom-left: GREEN | Bottom-right: BLUE
 
+  const isTop  = row < ROWS / 2;
+  const isLeft = col < COLS / 2;
+
+  // Base hue per quadrant
   let hue: number;
-  let saturation: number;
-  let lightness: number;
+  if (isTop && isLeft)   hue = 4;    // RED
+  if (isTop && !isLeft)  hue = 46;   // YELLOW
+  if (!isTop && isLeft)  hue = 130;  // GREEN
+  if (!isTop && !isLeft) hue = 218;  // BLUE
 
-  if (isTop) {
-    hue = 355 + tx * 33;
-    if (hue > 360) hue -= 360;
-    saturation = 75;
-    lightness = 44 + tx * 14 + ty * 10;
-  } else {
-    hue = 242 - tx * 110;
-    saturation = 68;
-    lightness = 52 + tx * 18 + (1 - ty) * 10;
-  }
+  // Slight variation within each quadrant so circles aren't all identical
+  const tx = col / (COLS - 1);
+  const ty = row / (ROWS - 1);
+  const localX = isLeft ? tx * 2 : (tx - 0.5) * 2;       // 0→1 within quadrant horizontally
+  const localY = isTop  ? ty * 2 : (ty - 0.5) * 2;       // 0→1 within quadrant vertically
+  hue! += localX * 8 + localY * 4;  // gentle shift within the quadrant only
 
-  return `hsl(${Math.round(hue)}, ${saturation}%, ${Math.round(lightness)}%)`;
+  const saturation = 85;
+  const lightness  = 50 + localX * 4 + localY * 4;
+
+  return `hsl(${Math.round(hue!)}, ${saturation}%, ${Math.round(lightness)}%)`;
 }
 
 export function getMoodColorFromPosition(x: number, y: number): string {

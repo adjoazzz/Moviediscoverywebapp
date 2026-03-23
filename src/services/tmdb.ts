@@ -128,29 +128,48 @@ export async function fetchBookDetails(title: string, author: string): Promise<B
   if (key in bookCache) return bookCache[key];
 
   try {
-    const query = encodeURIComponent(`intitle:${title} inauthor:${author}`);
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&printType=books&langRestrict=en`);
+    // Use Open Library Search API — returns cover IDs and descriptions natively, no auth needed
+    const query = encodeURIComponent(`${title} ${author}`);
+    const res = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=1&fields=key,title,author_name,cover_i,first_publish_year,subject,ratings_average,description`);
     const data = await res.json();
-    const item = data.items?.[0];
-    if (!item) { bookCache[key] = null; return null; }
+    const doc = data.docs?.[0];
 
-    const info = item.volumeInfo;
+    if (!doc) {
+      bookCache[key] = null;
+      return null;
+    }
+
+    // cover_i is the Open Library cover ID — very reliable, no hotlink blocking
+    const poster_path = doc.cover_i
+      ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
+      : null;
+
+    // Fetch description from the works endpoint if we have a key
+    let overview = '';
+    if (doc.key) {
+      try {
+        const workRes = await fetch(`https://openlibrary.org${doc.key}.json`);
+        const work = await workRes.json();
+        overview = typeof work.description === 'string'
+          ? work.description
+          : work.description?.value ?? '';
+      } catch {
+        overview = '';
+      }
+    }
+
     const result: BookDetails = {
-      id: item.id,
-      title: info.title,
-      poster_path: (() => {
-        const raw = info.imageLinks?.extraLarge ?? info.imageLinks?.large ?? info.imageLinks?.medium ?? info.imageLinks?.thumbnail ?? null;
-        if (!raw) return null;
-        return raw.replace('http:', 'https:').replace('&edge=curl', '').replace('zoom=1', 'zoom=3');
-      })(),
-      overview: info.description ?? '',
-      release_date: info.publishedDate ?? '',
-      vote_average: info.averageRating ?? 0,
+      id: doc.key ?? key,
+      title: doc.title ?? title,
+      poster_path,
+      overview,
+      release_date: doc.first_publish_year ? String(doc.first_publish_year) : '',
+      vote_average: doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : 0,
     };
     bookCache[key] = result;
     return result;
   } catch (err) {
-    console.error(`Google Books fetch failed for "${title}":`, err);
+    console.error(`Open Library fetch failed for "${title}":`, err);
     bookCache[key] = null;
     return null;
   }

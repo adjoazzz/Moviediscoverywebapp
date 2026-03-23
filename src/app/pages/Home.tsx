@@ -1,10 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { moods, type Mood } from '../../data/moods';
-import { dramas } from '../../data/dramas';
-import { animes } from '../../data/anime';
-import { books } from '../../data/books';
-
 export type ContentType = 'movies' | 'drama' | 'anime' | 'books';
 export type DramaFilter = 'all' | 'kdrama' | 'cdrama' | 'jdrama';
 
@@ -41,35 +37,31 @@ const rowMap: Record<string, number> = {
 // Bottom half: left=deep indigo-blue → center=light sky blue → right=deep green
 // Both hue AND lightness shift smoothly — each circle is unique, no checkerboard
 function getMoodColor(col: number, row: number): string {
-  const isTop = row < ROWS / 2;
-  const tx = col / (COLS - 1); // 0=left, 1=right
+  // 4 clear quadrants — no blending between them
+  // Top-left: RED | Top-right: YELLOW
+  // Bottom-left: GREEN | Bottom-right: BLUE
 
-  // Within each half, row position (ty) also affects lightness slightly
-  const ty = isTop
-    ? (row / (ROWS / 2 - 1))          // 0=top edge, 1=middle
-    : ((row - ROWS / 2) / (ROWS / 2 - 1)); // 0=middle, 1=bottom edge
+  const isTop  = row < ROWS / 2;
+  const isLeft = col < COLS / 2;
 
+  // Base hue per quadrant
   let hue: number;
-  let saturation: number;
-  let lightness: number;
+  if (isTop && isLeft)   hue = 4;    // RED
+  if (isTop && !isLeft)  hue = 46;   // YELLOW
+  if (!isTop && isLeft)  hue = 130;  // GREEN
+  if (!isTop && !isLeft) hue = 218;  // BLUE
 
-  if (isTop) {
-    // Hue: deep red (355°) left → warm orange (28°) right
-    hue = 355 + tx * 33;
-    if (hue > 360) hue -= 360;
-    saturation = 75;
-    // Lightness: dark at edges, gradually lighter toward center meeting line
-    // Also slight variation per row
-    lightness = 44 + tx * 14 + ty * 10; // red: slightly gentler dark edge
-  } else {
-    // Hue: indigo-blue (242°) left → emerald green (148°) right
-    hue = 242 - tx * 110; // 242° blue left → 132° proper green right (was 148° teal)
-    saturation = 68;
-    // Lightness: dark at edges, lighter toward center
-    lightness = 52 + tx * 18 + (1 - ty) * 10; // blue: slightly gentler dark edge
-  }
+  // Slight variation within each quadrant so circles aren't all identical
+  const tx = col / (COLS - 1);
+  const ty = row / (ROWS - 1);
+  const localX = isLeft ? tx * 2 : (tx - 0.5) * 2;       // 0→1 within quadrant horizontally
+  const localY = isTop  ? ty * 2 : (ty - 0.5) * 2;       // 0→1 within quadrant vertically
+  hue! += localX * 8 + localY * 4;  // gentle shift within the quadrant only
 
-  return `hsl(${Math.round(hue)}, ${saturation}%, ${Math.round(lightness)}%)`;
+  const saturation = 85;
+  const lightness  = 50 + localX * 4 + localY * 4;
+
+  return `hsl(${Math.round(hue!)}, ${saturation}%, ${Math.round(lightness)}%)`;
 }
 
 // Returns black or white depending on which has better contrast against the bg color
@@ -102,8 +94,6 @@ export default function Home() {
   const [cellSize, setCellSize] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<ContentType>('movies');
-  const [dramaFilter, setDramaFilter] = useState<DramaFilter>('all');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -290,7 +280,7 @@ export default function Home() {
     isDragging.current = false;
     // If it was a tap (not a drag), navigate to active mood
     if (!didDrag.current && activeId) {
-      navigate(`/mood/${activeId}`, { state: { contentType } });
+      navigate(`/mood/${activeId}`);
     }
     // Don't reset activeId — keep last circle active until finger moves to a new one
   }
@@ -299,7 +289,7 @@ export default function Home() {
     if (didDrag.current) return;
     // Desktop click: tap once to activate, tap again to navigate
     if (activeId === moodId) {
-      navigate(`/mood/${moodId}`, { state: { contentType } });
+      navigate(`/mood/${moodId}`);
     } else {
       setActiveId(moodId);
     }
@@ -311,20 +301,14 @@ export default function Home() {
     ? getMoodColor(activeMoodPos.col, activeMoodPos.row)
     : 'white';
 
-  // Pick the right dataset based on content type
-  const activeData = contentType === 'movies' ? moods
-    : contentType === 'drama' ? dramas
-    : contentType === 'anime' ? animes
-    : books;
-
   const query = searchQuery.trim().toLowerCase();
   const moodResults = query
-    ? activeData.filter((m: Mood) => m.name.toLowerCase().includes(query))
+    ? moods.filter((m: Mood) => m.name.toLowerCase().includes(query))
     : [];
 
   const movieResults: { movie: { title: string; director: string; year: number }; mood: typeof moods[0] }[] = [];
   if (query.length >= 2) {
-    for (const mood of activeData as Mood[]) {
+    for (const mood of moods) {
       for (const movie of mood.movies) {
         if (movie.title.toLowerCase().includes(query)) {
           movieResults.push({ movie, mood });
@@ -346,69 +330,6 @@ export default function Home() {
         <h1 className="text-white text-2xl tracking-tight font-light">
           mood<span className="text-white/30">/</span>film
         </h1>
-
-        {/* Content type toggle */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          background: 'rgba(255,255,255,0.07)',
-          borderRadius: 30,
-          padding: '4px',
-          gap: 2,
-        }}>
-          {(['movies', 'drama', 'anime', 'books'] as ContentType[]).map(type => (
-            <button
-              key={type}
-              onClick={() => { setContentType(type); setDramaFilter('all'); }}
-              style={{
-                padding: '5px 12px',
-                borderRadius: 24,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: contentType === type ? 600 : 400,
-                background: contentType === type ? 'rgba(255,255,255,0.15)' : 'transparent',
-                color: contentType === type ? 'white' : 'rgba(255,255,255,0.45)',
-                transition: 'all 0.2s ease',
-                textTransform: 'capitalize',
-              }}
-            >
-              {type === 'movies' ? '🎬' : type === 'drama' ? '📺' : type === 'anime' ? '🎌' : '📚'} {type}
-            </button>
-          ))}
-        </div>
-
-        {/* Drama sub-filter */}
-        {contentType === 'drama' && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'rgba(255,255,255,0.07)',
-            borderRadius: 30,
-            padding: '4px',
-            gap: 2,
-          }}>
-            {(['all', 'kdrama', 'cdrama', 'jdrama'] as DramaFilter[]).map(f => (
-              <button
-                key={f}
-                onClick={() => setDramaFilter(f)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 24,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 11,
-                  fontWeight: dramaFilter === f ? 600 : 400,
-                  background: dramaFilter === f ? 'rgba(255,255,255,0.15)' : 'transparent',
-                  color: dramaFilter === f ? 'white' : 'rgba(255,255,255,0.45)',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {f === 'all' ? 'All' : f === 'kdrama' ? 'K-Drama' : f === 'cdrama' ? 'C-Drama' : 'J-Drama'}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Search area */}
         <div className="flex items-center gap-3 relative">
@@ -501,7 +422,7 @@ export default function Home() {
                     return (
                       <button
                         key={mood.id}
-                        onClick={() => { navigate(`/mood/${mood.id}`, { state: { contentType } }); setSearchQuery(''); setSearchOpen(false); }}
+                        onClick={() => { navigate(`/mood/${mood.id}`); setSearchQuery(''); setSearchOpen(false); }}
                         style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                       >
                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}/>
@@ -524,7 +445,7 @@ export default function Home() {
                     return (
                       <button
                         key={i}
-                        onClick={() => { navigate(`/mood/${mood.id}`, { state: { contentType } }); setSearchQuery(''); setSearchOpen(false); }}
+                        onClick={() => { navigate(`/mood/${mood.id}`); setSearchQuery(''); setSearchOpen(false); }}
                         style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'left' }}
                       >
                         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }}/>
@@ -584,7 +505,7 @@ export default function Home() {
             transform: `translate(${position.x}px, ${position.y}px)`,
           }}
         >
-          {activeData.map((mood: Mood, index: number) => {
+          {moods.map((mood: Mood, index: number) => {
             const { x, y, col, row } = getGridPos(mood, cellSize);
             const color = getMoodColor(col, row);
             const shape = morphShapes[index % morphShapes.length];
@@ -718,7 +639,7 @@ export default function Home() {
             </p>
           </div>
           <button
-            onClick={() => activeMood && navigate(`/mood/${activeMood.id}`, { state: { contentType } })}
+            onClick={() => activeMood && navigate(`/mood/${activeMood.id}`)}
             style={{
               width: 50,
               height: 50,
