@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { moods, type Mood } from '../../data/moods';
 export type ContentType = 'movies' | 'drama' | 'anime' | 'books';
@@ -306,19 +306,41 @@ export default function Home() {
     ? moods.filter((m: Mood) => m.name.toLowerCase().includes(query))
     : [];
 
-  const movieResults: { movie: { title: string; director: string; year: number }; mood: typeof moods[0] }[] = [];
+  type ContentResult = { movie: { title: string; director: string; year: number }; mood: Mood; type: string };
+
+  const movieResults: ContentResult[] = [];
+  const bookResults: ContentResult[] = [];
+  const animeResults: ContentResult[] = [];
+  const dramaResults: ContentResult[] = [];
+
   if (query.length >= 2) {
     for (const mood of moods) {
       for (const movie of mood.movies) {
-        if (movie.title.toLowerCase().includes(query)) {
-          movieResults.push({ movie, mood });
-        }
+        if (movie.title.toLowerCase().includes(query)) movieResults.push({ movie, mood, type: 'film' });
       }
-      if (movieResults.length >= 6) break;
+      if (movieResults.length >= 5) break;
+    }
+    for (const mood of books) {
+      for (const movie of mood.movies) {
+        if (movie.title.toLowerCase().includes(query)) bookResults.push({ movie, mood, type: 'book' });
+      }
+      if (bookResults.length >= 5) break;
+    }
+    for (const mood of animes) {
+      for (const movie of mood.movies) {
+        if (movie.title.toLowerCase().includes(query)) animeResults.push({ movie, mood, type: 'anime' });
+      }
+      if (animeResults.length >= 5) break;
+    }
+    for (const mood of dramas) {
+      for (const movie of mood.movies) {
+        if (movie.title.toLowerCase().includes(query)) dramaResults.push({ movie, mood, type: 'drama' });
+      }
+      if (dramaResults.length >= 5) break;
     }
   }
 
-  const hasResults = moodResults.length > 0 || movieResults.length > 0;
+  const hasResults = moodResults.length > 0 || movieResults.length > 0 || bookResults.length > 0 || animeResults.length > 0 || dramaResults.length > 0;
 
   if (cellSize === 0) return <div className="w-screen h-screen bg-black" />;
 
@@ -434,12 +456,17 @@ export default function Home() {
               )}
 
               {/* Movie results */}
-              {movieResults.length > 0 && (
-                <>
-                  <div style={{ padding: '8px 14px 4px', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', borderTop: moodResults.length > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                    Films
+              {[
+                { results: movieResults, label: '🎬 Films', show: movieResults.length > 0 },
+                { results: bookResults, label: '📚 Books', show: bookResults.length > 0 },
+                { results: animeResults, label: '🎌 Anime', show: animeResults.length > 0 },
+                { results: dramaResults, label: '📺 Drama', show: dramaResults.length > 0 },
+              ].map(({ results, label, show }) => show && (
+                <React.Fragment key={label}>
+                  <div style={{ padding: '8px 14px 4px', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    {label}
                   </div>
-                  {movieResults.slice(0, 6).map(({ movie, mood }, i) => {
+                  {results.slice(0, 5).map(({ movie, mood }: { movie: { title: string; director: string; year: number }; mood: Mood }, i: number) => {
                     const { col, row } = getGridPos(mood, cellSize);
                     const color = getMoodColor(col, row);
                     return (
@@ -458,8 +485,8 @@ export default function Home() {
                       </button>
                     );
                   })}
-                </>
-              )}
+                </React.Fragment>
+              ))}
             </div>
           )}
 
